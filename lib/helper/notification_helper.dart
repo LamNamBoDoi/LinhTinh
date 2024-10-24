@@ -96,7 +96,7 @@ class NotificationHelper {
       }
     }
   }
-
+  // hiển thị thông báo văn bản
   static Future<void> showTextNotification(String title, String body,
       String orderID, FlutterLocalNotificationsPlugin fln) async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics =

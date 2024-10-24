@@ -1,0 +1,15 @@
+1. controller
+    - Chứa lớp điều khiển
+2. data
+    - Chứa các lớp và mô hình liên quan đến dữ liệu: mô hình đối tượng, dịch vụ gọi api, quản lý dữ liệu
+3. helper
+    - Chứa lớp tiện ích, hàm tái sử dụng cho nhiều nơi
+4. screen
+    - Chứa màn hình
+5. theme
+    - Chứa cấu hình và định nghĩa giao diện
+6. utils
+    - Thường chứa
+7. view
+
+8. widgets

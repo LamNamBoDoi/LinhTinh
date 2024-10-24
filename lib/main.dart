@@ -17,11 +17,16 @@ import 'helper/route_helper.dart';
 
 Future<void> main() async {
   if (kDebugMode) {
+    // kiểm tra xem có đang chạy ở chế độ debug ko
     print("Bắt đầu: ${DateTime.now()}");
   }
-  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  WidgetsBinding widgetsBinding =
+      WidgetsFlutterBinding.ensureInitialized(); // khởi tạo
+  // flutter native splach hiển thị màn hình khởi động lần đầu tiên
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  // kiểm tra có phải điện thoại di động
   if (ResponsiveHelper.isMobilePhone()) {
+    // ghi đè HTTP
     HttpOverrides.global = MyHttpOverrides();
   }
 
@@ -58,9 +63,10 @@ class MyApp extends StatelessWidget {
           translations: Messages(languages: languages),
           fallbackLocale: Locale(AppConstants.languages[0].languageCode,
               AppConstants.languages[0].countryCode),
-          initialRoute: GetPlatform.isWeb
-              ? RouteHelper.getInitialRoute()
-              : RouteHelper.getSplashRoute(),
+          // initialRoute: GetPlatform.isWeb
+          //     ? RouteHelper.getInitialRoute()
+          //     : RouteHelper.getSplashRoute(),
+          initialRoute: RouteHelper.signUp,
           getPages: RouteHelper.routes,
           defaultTransition: Transition.topLevel,
           transitionDuration: const Duration(milliseconds: 250),

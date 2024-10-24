@@ -1,10 +1,10 @@
 class TokenResponsive {
-  String? accessToken;
-  String? tokenType;
-  String? refreshToken;
-  int? expiresIn;
-  String? scope;
-  String? organization;
+  String? accessToken;// mã thông báo truy cập
+  String? tokenType;// loại mã thông báo
+  String? refreshToken;// mã thông báo làm mới
+  int? expiresIn;// thời gian còn lại
+  String? scope;// phạm vi quyền
+  String? organization;// tên tổ chức
 
   TokenResponsive(
       {this.accessToken,

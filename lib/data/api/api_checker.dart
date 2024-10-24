@@ -5,6 +5,7 @@ import '../../helper/route_helper.dart';
 import '../../view/custom_snackbar.dart';
 
 class ApiChecker {
+// kiểm tra và xác thực các yêu cầu API
   static void checkApi(Response response) {
     if (response.statusCode == 401) {
       Get.find<AuthController>().clearData();

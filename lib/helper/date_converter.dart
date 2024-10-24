@@ -1,6 +1,6 @@
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-
+//lớp cung cấp các phương thức tiện ích cho việc định dạng và chuyê đổi giữa các định dạng ngày giờ
 class DateConverter {
 
   static String formatDate(DateTime dateTime) {
