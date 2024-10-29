@@ -1,4 +1,10 @@
 {
+  "please_try_again": "Đã xảy ra lỗi xin vui lòng thử lại",
+  "infomation_incorect": "Thông tin không chính xác",
+  "register_success": "Đăng ký thành công",
+  "cannot_left_blank": "Không được để trống",
+  "birth_place": "Quê quán",
+  "username": "Tên đăng nhập",
   "connection_to_api_server_failed": "Kết nối với máy chủ API không thành công do kết nối internet",
   "select_language": "Chọn ngôn ngữ",
   "save": "Lưu",
@@ -395,6 +401,7 @@
   "week": "tuần",
   "day": "ngày",
   "hour": "giờ",
+  "birth_day": "Ngày sinh",
   "product_images": "Hình ảnh Dịch vụ",
   "prescription": "Mặt bằng cần Setup",
   "are_you_sure_want_to_switch": "Bạn có chắc chắn muốn chuyển sang",

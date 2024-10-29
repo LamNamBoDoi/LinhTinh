@@ -1,4 +1,10 @@
 {
+  "cannot_left_blank": "Cannot left blank",
+  "register_success": "Register success",
+  "infomation_incorect": "Infomation incorect",
+  "please_try_again": "An error occurred. Please try again",
+  "birth_place": "Birth Place",
+  "username": "Username",
   "connection_to_api_server_failed": "Connection to API server failed due to internet connection",
   "select_language": "Select Language",
   "save": "Save",
