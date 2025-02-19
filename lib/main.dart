@@ -66,7 +66,8 @@ class MyApp extends StatelessWidget {
           // initialRoute: GetPlatform.isWeb
           //     ? RouteHelper.getInitialRoute()
           //     : RouteHelper.getSplashRoute(),
-          initialRoute: RouteHelper.signUp,
+          initialRoute: RouteHelper.signIn,
+
           getPages: RouteHelper.routes,
           defaultTransition: Transition.topLevel,
           transitionDuration: const Duration(milliseconds: 250),

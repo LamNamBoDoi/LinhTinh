@@ -1,4 +1,5 @@
-import 'package:timesheet/data/model/body/role.dart';
+import 'package:timesheet/data/model/body/users/role.dart';
+import 'package:timesheet/utils/app_constants.dart';
 
 class User {
   int? id;
@@ -12,6 +13,7 @@ class User {
   String? firstName;
   String? lastName;
   String? password;
+  String? image;
   bool? changePass;
   bool? setPassword;
   List<Role>? roles;
@@ -38,6 +40,7 @@ class User {
     this.changePass,
     this.setPassword,
     this.roles,
+    this.image,
     this.countDayCheckin,
     this.countDayTracking,
     this.gender,
@@ -60,6 +63,7 @@ class User {
       firstName: json['firstName'],
       lastName: json['lastName'],
       password: json['password'],
+      image: json['image'],
       changePass: json['changePass'],
       setPassword: json['setPassword'],
       roles: List<Role>.from(json['roles']?.map((e) => Role.fromJson(e))),
@@ -86,6 +90,7 @@ class User {
       'firstName': firstName,
       'lastName': lastName,
       'password': password,
+      'image': image,
       'changePass': changePass,
       'setPassword': setPassword,
       'roles': roles?.map((role) => role.toJson()).toList(),
@@ -99,7 +104,7 @@ class User {
     };
   }
 
-  // String getLinkImageUrl(String typeImage) {
-  //   return "${AppConstants.BASE_URL}${AppConstants.GET_IMAGE_BY_NAME}${id}_$typeImage.png";
-  // }
+  String getLinkImageUrl(String typeImage) {
+    return "${AppConstants.BASE_URL}${AppConstants.GET_IMAGE_BY_NAME}${id}_$typeImage.png";
+  }
 }

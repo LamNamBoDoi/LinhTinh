@@ -1,45 +1,53 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rounded_date_picker/flutter_rounded_date_picker.dart';
 import 'package:get/get.dart';
 import 'package:timesheet/controller/auth_controller.dart';
-import 'package:timesheet/data/model/body/role.dart';
-import 'package:timesheet/data/model/body/user.dart';
+import 'package:timesheet/data/model/body/users/role.dart';
+import 'package:timesheet/data/model/body/users/user.dart';
 import 'package:timesheet/helper/date_converter.dart';
+import 'package:timesheet/screen/sign_in/sign_in_screen.dart';
+import 'package:timesheet/utils/color_resources.dart';
 import 'package:timesheet/utils/dimensions.dart';
 import 'package:timesheet/utils/images.dart';
 import 'package:timesheet/view/custom_button.dart';
 import 'package:timesheet/view/custom_snackbar.dart';
 import 'package:timesheet/view/custom_text_field.dart';
 
-class SignUpScreen extends StatefulWidget {
+class SignUpScreen extends StatelessWidget {
   SignUpScreen({super.key});
 
-  @override
-  State<SignUpScreen> createState() => _SignUpScreenState();
-}
-
-class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _lastNameTextController = TextEditingController();
+
   final TextEditingController _firstNameTextController =
       TextEditingController();
+
   final TextEditingController _dateBirthDayTextController =
       TextEditingController();
+
   final TextEditingController _birthPlaceTextController =
       TextEditingController();
+
   final TextEditingController _emailTextController = TextEditingController();
+
   final TextEditingController _ussernameTextController =
       TextEditingController();
+
   final TextEditingController _paswordTextController = TextEditingController();
+
   final TextEditingController _confirmPasswordTextController =
       TextEditingController();
 
   final _valueGender = Rx<String?>(null);
+
   final _showPass = false.obs;
+  final _showConfirmPass = false.obs;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        //appBar: AppBar(),
         body: SafeArea(
       child: Stack(
         children: [
@@ -229,28 +237,52 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   controller: _confirmPasswordTextController,
                   lable: "confirm_password".tr,
                   padding: EdgeInsets.all(10),
-                  isShowPass: _showPass.value,
-                  lastIcon: Icon(_showPass.value
+                  isShowPass: _showConfirmPass.value,
+                  lastIcon: Icon(_showConfirmPass.value
                       ? Icons.visibility
                       : Icons.visibility_off),
-                  onPressedLastIcon: () => _showPass.value = !_showPass.value),
+                  onPressedLastIcon: () =>
+                      _showConfirmPass.value = !_showConfirmPass.value),
             ),
             CustomButton(
               width: double.infinity,
               buttonText: "sign_up".tr,
               margin: const EdgeInsets.all(10),
-              onPressed: _login,
+              onPressed: _signup,
+            ),
+            Padding(
+              padding: EdgeInsets.all(10),
+              child: RichText(
+                text: TextSpan(style: TextStyle(fontSize: 14), children: [
+                  TextSpan(
+                      text: "don't_have_an_account? ".tr,
+                      style: const TextStyle(color: Colors.black)),
+                  TextSpan(
+                      text: "sign_in".tr,
+                      style: TextStyle(
+                          color: ColorResources.COLOR_PRIMARY,
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold),
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          Get.to(SignInScreen(),
+                              transition: Transition.rightToLeft,
+                              duration: Duration(milliseconds: 400),
+                              curve: Curves.easeIn);
+                        })
+                ]),
+              ),
             ),
             SizedBox(
               height: 35,
-            )
+            ),
           ],
         ),
       ),
     );
   }
 
-  _login() {
+  _signup() {
     String lastName = _lastNameTextController.text;
     String firstName = _firstNameTextController.text;
     String? dateBirthDay = _dateBirthDayTextController.text;
@@ -272,7 +304,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       showCustomSnackBar('cannot_left_blank'.tr);
     } else {
       Get.find<AuthController>()
-          .signin(User(
+          .signup(User(
         id: null,
         username: ussername,
         active: true,
@@ -298,7 +330,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
           .then((value) {
         if (value == 200 || value == 201) {
           showCustomSnackBar('register_success'.tr);
-          //Get.back();
         } else if (value == 400) {
           showCustomSnackBar('infomation_incorect'.tr);
         } else {

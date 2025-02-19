@@ -62,9 +62,13 @@ dependencies:
   firebase_core: ^2.1.0
   firebase_messaging: ^14.0.2
   google_fonts: ^4.0.4
-  
   flutter_rounded_date_picker: ^3.0.4
   dropdown_button2: ^2.3.9
+  table_calendar: ^3.1.2
+  percent_indicator: ^4.0.1
+  flutter_datetime_picker_plus: ^2.2.0
+  quickalert: ^1.1.0
+  flash: ^3.1.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

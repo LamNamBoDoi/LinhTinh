@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:timesheet/data/api/api_checker.dart';
-import 'package:timesheet/data/model/body/user.dart';
+import 'package:timesheet/data/model/body/users/user.dart';
 import 'package:timesheet/data/model/response/token_resposive.dart';
 import 'package:timesheet/data/repository/auth_repo.dart';
 
@@ -56,14 +56,13 @@ class AuthController extends GetxController implements GetxService {
     return response.statusCode!;
   }
 
-  Future<int> signin(User user) async {
+  Future<int> signup(User user) async {
     _loading = true;
     update();
 
-    Response response = await repo.signin(user);
+    Response response = await repo.signup(user);
     debugPrint("okeoke: ${response.statusCode}");
     if (response.statusCode == 200 || response.statusCode == 201) {
-      print('hahaa');
     } else {
       ApiChecker.checkApi(response);
     }

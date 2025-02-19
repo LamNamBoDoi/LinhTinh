@@ -5,10 +5,11 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timesheet/data/model/body/token_request.dart';
-import 'package:timesheet/data/model/body/user.dart';
+import 'package:timesheet/data/model/body/users/user.dart';
 
 import '../../utils/app_constants.dart';
 import '../api/api_client.dart';
+
 // quản lý hoạt động liên quan đến xác thực
 class AuthRepo {
   final ApiClient apiClient;
@@ -40,7 +41,7 @@ class AuthRepo {
         _header);
   }
 
-  Future<Response> signin(User user) async =>
+  Future<Response> signup(User user) async =>
       await apiClient.postData(AppConstants.SIGN_UP, jsonEncode(user), null);
 
   Future<Response> logOut() async {

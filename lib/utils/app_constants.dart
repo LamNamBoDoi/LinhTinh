@@ -1,4 +1,3 @@
-
 import '../data/model/language_model.dart';
 import 'images.dart';
 
@@ -11,7 +10,21 @@ class AppConstants {
   static const String LOGIN_URI = '/mita/oauth/token';
   static const String SIGN_UP = '/mita/public/sign';
   static const String LOG_OUT = '/mita/oauth/logout';
+  static const String GET_TIME_SHEET = '/mita/time-sheets';
+  static const String GET_TIME_SHEET_CHECKIN = '/mita/time-sheets/check-in';
+  static const String GET_TRACKING = '/mita/tracking';
   static const String GET_USER = '/mita/users/get-user-current';
+  static const String GET_USER_BY_ID = '/mita/users/';
+  static const String UPDATE_USER_MYSELF = '/mita/users/update-myself';
+  static const String UPDATE_USER_BY_ID = '/mita/users/update/';
+  static const String UPDATE_BLOCK_USER_BY_ID = '/mita/users/lock/';
+  static const String GET_USERS = '/mita/users/searchByPage';
+  static const String GET_IMAGE_BY_NAME = '/mita/public/images/';
+  static const String Get_NewPosts = '/mita/posts/get-news';
+  static const String LIKE_POST = '/mita/posts/likes/';
+  static const String COMMENT_POST = '/mita/posts/comments/';
+  static const String CREATE_POST = '/mita/posts/create';
+
   // Shared Key
   static const String THEME = 'theme';
   static const String TOKEN = 'token';
@@ -27,9 +40,7 @@ class AppConstants {
   static const String MODULE_ID = 'moduleId';
   static const String LOCALIZATION_KEY = 'X-localization';
 
-
   // Shared Key
-
 
   static List<LanguageModel> languages = [
     LanguageModel(

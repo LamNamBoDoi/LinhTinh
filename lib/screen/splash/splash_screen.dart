@@ -78,7 +78,9 @@ class _SplashScreenState extends State<SplashScreen> {
     Get.find<AuthController>().getCurrentUser().then((value) => {
           if (value == 200)
             {
-              Get.to(const HomeScreen(),)
+              Get.to(
+                HomeScreen(),
+              )
             }
           else
             {Get.offNamed(RouteHelper.signIn)}
