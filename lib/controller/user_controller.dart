@@ -34,7 +34,7 @@ class UserController extends GetxController implements GetxService {
 
   Future<void> getCurrentUser() async {
     Response response = await repo.getCurrentUser();
-
+    print(response.body);
     if (response.statusCode == 200) {
       _currentUser = User.fromJson(response.body);
     } else {
@@ -56,6 +56,7 @@ class UserController extends GetxController implements GetxService {
     Response response =
         await repo.getListUsersPage("Thien12", currentPage, 10, 0);
     debugPrint("okeoke: ${response.statusCode}");
+
     if (response.statusCode == 200) {
       var responseData = response.body;
       if (responseData is Map<String, dynamic>) {
@@ -65,6 +66,21 @@ class UserController extends GetxController implements GetxService {
       } else {
         throw Exception("Unexpected response format");
       }
+    } else {
+      ApiChecker.checkApi(response);
+    }
+    _loading = false;
+    update();
+  }
+
+  Future<void> updateUserMySelf(User user) async {
+    _loading = true;
+    update();
+    Response response = await repo.updateUserMySelf(user);
+    debugPrint("updateUserMySelf: ${response.statusCode}");
+
+    if (response.statusCode == 200) {
+      _currentUser = User.fromJson(response.body);
     } else {
       ApiChecker.checkApi(response);
     }

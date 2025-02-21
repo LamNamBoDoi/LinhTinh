@@ -1,5 +1,6 @@
 import 'dart:convert'; // chuyển đổi json với đối tượng dart
 import 'dart:developer'; // sử dụng log trong debug
+import 'dart:io';
 import 'dart:typed_data'; // làm việc với dữ liệu kiểu số nguyên
 import 'package:flutter/foundation.dart' as foundation; // kiểm tra chế độ debug
 import 'package:get/get.dart';
@@ -122,35 +123,6 @@ class ApiClient extends GetxService {
     }
   }
 
-  Future<Response> postMultipartData(
-      String uri, Map<String, String> body, List<MultipartBody> multipartBody,
-      {required Map<String, String>? headers}) async {
-    try {
-      if (foundation.kDebugMode) {
-        log('====> API Call: $uri\nHeader: $_mainHeaders');
-        log('====> API Body: $body with ${multipartBody.length} picture');
-      }
-      http.MultipartRequest request =
-          http.MultipartRequest('POST', Uri.parse(appBaseUrl + uri));
-      request.headers.addAll(headers ?? _mainHeaders);
-      for (MultipartBody multipart in multipartBody) {
-        Uint8List list = await multipart.file.readAsBytes();
-        request.files.add(http.MultipartFile(
-          multipart.key,
-          multipart.file.readAsBytes().asStream(),
-          list.length,
-          filename: '${DateTime.now().toString()}.png',
-        ));
-      }
-      request.fields.addAll(body);
-      http.Response response =
-          await http.Response.fromStream(await request.send());
-      return handleResponse(response, uri);
-    } catch (e) {
-      return Response(statusCode: 1, statusText: noInternetMessage);
-    }
-  }
-
   Future<Response> putData(String uri, dynamic body,
       {Map<String, String>? headers}) async {
     try {
@@ -188,6 +160,7 @@ class ApiClient extends GetxService {
       return Response(statusCode: 1, statusText: noInternetMessage);
     }
   }
+
   // hàm xử lý phản hồi từ 1 yêu cầu HTTP
   Response handleResponse(http.Response response, String uri) {
     dynamic body;
@@ -229,6 +202,66 @@ class ApiClient extends GetxService {
       ('====> API Response: [${response0.statusCode}] $uri\n${response0.body}');
     }
     return response0;
+  }
+
+  // Future<Response> postMultipartData(
+  //   String uri,
+  //   Map<String, String> body,
+  //   List<MultipartBody> multipartBody,
+  //   Map<String, String>? headers,
+  // ) async {
+  //   try {
+  //     if (foundation.kDebugMode) {
+  //       log('====> API Call: $uri\nHeader: $_mainHeaders');
+  //       log('====> API Body: $body with ${multipartBody.length} picture');
+  //     }
+  //     http.MultipartRequest request =
+  //         http.MultipartRequest('POST', Uri.parse(appBaseUrl + uri));
+  //     request.headers.addAll(headers ?? _mainHeaders);
+  //     for (MultipartBody multipart in multipartBody) {
+  //       Uint8List list = await multipart.file.readAsBytes();
+  //       request.files.add(http.MultipartFile(
+  //         multipart.key,
+  //         multipart.file.readAsBytes().asStream(),
+  //         list.length,
+  //         filename: '${DateTime.now().toString()}.png',
+  //       ));
+  //     }
+
+  //     request.fields.addAll(body);
+  //     http.Response response =
+  //         await http.Response.fromStream(await request.send());
+  //     return handleResponse(response, uri);
+  //   } catch (e) {
+  //     return Response(statusCode: 1, statusText: noInternetMessage);
+  //   }
+  // }
+
+  Future<Response> postFileMultipartData(
+      {required String uri,
+      required Map<String, String> body,
+      required File file,
+      Map<String, String>? headers}) async {
+    try {
+      if (foundation.kDebugMode) {
+        print('====> API Call: $uri\nHeader: $_mainHeaders');
+      }
+      http.MultipartRequest request =
+          http.MultipartRequest('POST', Uri.parse(appBaseUrl + uri));
+      request.headers.addAll(headers ?? _mainHeaders);
+
+      http.MultipartFile imageMultipartFile = await http.MultipartFile.fromPath(
+          'uploadfile ', file.path,
+          filename: '${DateTime.now().toString()}.png');
+      request.files.add(imageMultipartFile);
+
+      request.fields.addAll(body);
+      http.Response response =
+          await http.Response.fromStream(await request.send());
+      return handleResponse(response, uri);
+    } catch (e) {
+      return Response(statusCode: 1, statusText: noInternetMessage);
+    }
   }
 }
 

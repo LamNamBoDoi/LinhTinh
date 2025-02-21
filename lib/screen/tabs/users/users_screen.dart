@@ -60,10 +60,14 @@ class UsersScreen extends StatelessWidget {
                       ),
                       child: ListTile(
                         leading: CircleAvatar(
-                          child: user.hasPhoto!
-                              ? null
-                              : const Icon(Icons.person, size: 30),
                           radius: 25,
+                          backgroundImage: user.image != null
+                              ? NetworkImage(user.getLinkImageUrl(
+                                  user.image!)) // Hiển thị ảnh từ URL
+                              : null,
+                          child: user.image == null
+                              ? Icon(Icons.person, size: 30)
+                              : null,
                         ),
                         title: Text(
                           user.displayName ?? "No Name",

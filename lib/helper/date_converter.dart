@@ -20,6 +20,11 @@ class DateConverter {
     return DateFormat('yyyy-MM-dd hh:mm:ss a').format(dateTime);
   }
 
+  static String getFormattedTime() {
+    DateTime now = DateTime.now();
+    return DateFormat("yyyy-MM-dd HH_mm_ss.SSSSSS").format(now);
+  }
+
   static String dateToTimeOnly(DateTime dateTime) {
     return DateFormat(_timeFormatter()).format(dateTime);
   }

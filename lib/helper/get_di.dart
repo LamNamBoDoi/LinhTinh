@@ -4,10 +4,12 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timesheet/controller/auth_controller.dart';
+import 'package:timesheet/controller/photo_controller.dart';
 import 'package:timesheet/controller/post_controller.dart';
 import 'package:timesheet/controller/timesheet_controller.dart';
 import 'package:timesheet/controller/tracking_controller.dart';
 import 'package:timesheet/controller/user_controller.dart';
+import 'package:timesheet/data/repository/photo_repo.dart';
 import 'package:timesheet/data/repository/post_repo.dart';
 import 'package:timesheet/data/repository/splash_repo.dart';
 import 'package:timesheet/data/repository/timesheet_repo.dart';
@@ -45,6 +47,7 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => TrackingRepo(apiClient: Get.find()));
   Get.lazyPut(() => UserRepo(apiClient: Get.find()));
   Get.lazyPut(() => PostRepo(apiClient: Get.find()));
+  Get.lazyPut(() => PhotoRepo(apiClient: Get.find()));
 
   // Controller
   Get.lazyPut(() => ThemeController(sharedPreferences: Get.find()));
@@ -55,6 +58,7 @@ Future<Map<String, Map<String, String>>> init() async {
   Get.lazyPut(() => TimeSheetController(repo: Get.find()));
   Get.lazyPut(() => UserController(repo: Get.find()));
   Get.lazyPut(() => PostController(repo: Get.find()));
+  Get.lazyPut(() => PhotoController(repo: Get.find()));
 
   // Retrieving localized data: tải dữ liệu ngôn ngữ
   Map<String, Map<String, String>> languages = {};

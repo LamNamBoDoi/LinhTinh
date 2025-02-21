@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:timesheet/controller/auth_controller.dart';
 import 'package:timesheet/controller/localization_controller.dart';
 import 'package:timesheet/controller/user_controller.dart';
+import 'package:timesheet/screen/tabs/setting/edit_profile_screen.dart';
 import 'package:timesheet/theme/theme_controller.dart';
 import 'package:timesheet/utils/app_constants.dart';
 
@@ -26,8 +27,17 @@ class SettingScreen extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 50,
-                    backgroundColor: const Color.fromRGBO(187, 222, 251, 1),
-                    child: Icon(Icons.person, size: 50, color: Colors.blue),
+                    backgroundColor:
+                        Colors.blue[200], // Màu nền nhạt hơn khi không có ảnh
+                    backgroundImage: controller.currentUser.image != null
+                        ? NetworkImage(controller.currentUser
+                            .getLinkImageUrl(controller.currentUser.image!))
+                        : null, // Nếu có ảnh, dùng NetworkImage
+                    child: controller.currentUser.image == null
+                        ? Icon(Icons.person,
+                            size: 50,
+                            color: Colors.white) // Icon màu xám đậm hơn
+                        : null,
                   ),
                   SizedBox(height: 10),
                   Text(controller.currentUser.displayName!,
@@ -44,7 +54,7 @@ class SettingScreen extends StatelessWidget {
               children: [
                 GetBuilder<ThemeController>(
                     builder: (controller) => ListTile(
-                          leading: Icon(
+                          leading: const Icon(
                             Icons.dark_mode,
                             color: Colors.blue,
                           ),
@@ -61,6 +71,17 @@ class SettingScreen extends StatelessWidget {
                     color: Colors.blue,
                   ),
                   title: Text("Thông báo"),
+                ),
+                Divider(),
+                ListTile(
+                  leading: Icon(
+                    Icons.person,
+                    color: Colors.blue,
+                  ),
+                  title: Text("Thông tin cá nhân"),
+                  onTap: () {
+                    Get.to(() => EditProfileScreen());
+                  },
                 ),
                 Divider(),
                 GetBuilder<LocalizationController>(builder: (controller) {

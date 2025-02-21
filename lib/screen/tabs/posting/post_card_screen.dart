@@ -24,10 +24,14 @@ class PostCard extends StatelessWidget {
             Row(
               children: [
                 CircleAvatar(
-                  child: post.user.image != null
-                      ? null
-                      : Icon(Icons.person, size: 30),
                   radius: 25,
+                  backgroundImage: post.user.image != null
+                      ? NetworkImage(post.user.getLinkImageUrl(
+                          post.user.image!)) // Hiển thị ảnh từ URL
+                      : null,
+                  child: post.user.image == null
+                      ? Icon(Icons.person, size: 30)
+                      : null,
                 ),
                 SizedBox(width: 10),
                 Column(

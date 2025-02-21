@@ -1,10 +1,13 @@
 import 'dart:io';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
+import 'package:timesheet/firebase_options.dart';
 import 'package:timesheet/theme/dark_theme.dart';
 import 'package:timesheet/theme/light_theme.dart';
 import 'package:timesheet/theme/theme_controller.dart';
@@ -29,6 +32,11 @@ Future<void> main() async {
     // ghi đè HTTP
     HttpOverrides.global = MyHttpOverrides();
   }
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  String? deviceToken = await FirebaseMessaging.instance.getToken();
+  print("Device Token: $deviceToken");
 
   Map<String, Map<String, String>> _languages = await di.init();
 

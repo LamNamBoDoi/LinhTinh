@@ -137,7 +137,7 @@ class SignUpScreen extends StatelessWidget {
                   context: context,
                   fontFamily: 'NotoSerif',
                   firstDate: DateTime(1950),
-                  lastDate: DateTime(2025),
+                  lastDate: DateTime(2026),
                   locale: Locale('en', 'US'),
                   borderRadius: 16,
                   height: 250,
@@ -181,19 +181,19 @@ class SignUpScreen extends StatelessWidget {
                     items: []
                       ..add(
                         DropdownMenuItem(
-                          value: "m",
+                          value: "M",
                           child: Text("male".tr),
                         ),
                       )
                       ..add(
                         DropdownMenuItem(
-                          value: "n",
+                          value: "N",
                           child: Text("female".tr),
                         ),
                       )
                       ..add(
                         DropdownMenuItem(
-                          value: "o",
+                          value: "O",
                           child: Text("other".tr),
                         ),
                       ),
@@ -259,7 +259,7 @@ class SignUpScreen extends StatelessWidget {
                       style: const TextStyle(color: Colors.black)),
                   TextSpan(
                       text: "sign_in".tr,
-                      style: TextStyle(
+                      style: const TextStyle(
                           color: ColorResources.COLOR_PRIMARY,
                           fontSize: 15,
                           fontWeight: FontWeight.bold),

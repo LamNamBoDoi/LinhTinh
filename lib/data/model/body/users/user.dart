@@ -105,6 +105,7 @@ class User {
   }
 
   String getLinkImageUrl(String typeImage) {
-    return "${AppConstants.BASE_URL}${AppConstants.GET_IMAGE_BY_NAME}${id}_$typeImage.png";
+    String newUrl = typeImage.replaceAll(" ", "%20").replaceAll(":", "%3A");
+    return "${AppConstants.BASE_URL}${AppConstants.GET_IMAGE_BY_NAME}$newUrl";
   }
 }
