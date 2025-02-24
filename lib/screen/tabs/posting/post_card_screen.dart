@@ -59,6 +59,11 @@ class PostCard extends StatelessWidget {
               style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 20),
+            // if (post.image != null)
+            //   Image.network(
+            //     post.getLinkImageUrl(post.image!),
+            //     fit: BoxFit.cover,
+            // ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

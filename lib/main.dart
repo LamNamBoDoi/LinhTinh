@@ -35,8 +35,6 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  String? deviceToken = await FirebaseMessaging.instance.getToken();
-  print("Device Token: $deviceToken");
 
   Map<String, Map<String, String>> _languages = await di.init();
 

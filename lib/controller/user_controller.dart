@@ -15,7 +15,7 @@ class UserController extends GetxController implements GetxService {
   bool isMyProfile = false;
   bool isAdmin = false;
 
-  List<User> _users = <User>[];
+  List<User> _listUsers = <User>[];
   List<User> _usersPage = <User>[];
   User _currentUser = User();
   User? _currentUserProfile;
@@ -23,7 +23,7 @@ class UserController extends GetxController implements GetxService {
   bool get loading => _loading;
   User get currentUser => _currentUser;
   User? get currentUserProfile => _currentUserProfile;
-  List<User> get users => _users;
+  List<User> get listUsers => _listUsers;
   List<User> get usersPage => _usersPage;
 
   void resetDataProfile() {
@@ -53,9 +53,8 @@ class UserController extends GetxController implements GetxService {
     _loading = true;
     update();
 
-    Response response =
-        await repo.getListUsersPage("Thien12", currentPage, 10, 0);
-    debugPrint("okeoke: ${response.statusCode}");
+    Response response = await repo.getListUsersPage("", currentPage, 10, 0);
+    debugPrint("List user page: ${response.statusCode}");
 
     if (response.statusCode == 200) {
       var responseData = response.body;
@@ -63,6 +62,23 @@ class UserController extends GetxController implements GetxService {
         PageableResponse convertPageableResponse =
             PageableResponse.fromJson(responseData);
         _usersPage = convertPageableResponse.content;
+        Response response = await repo.getListUsersPage(
+            "", 1, convertPageableResponse.totalElements, 0);
+        debugPrint("List user: ${response.statusCode}");
+
+        if (response.statusCode == 200) {
+          var responseData = response.body;
+          if (responseData is Map<String, dynamic>) {
+            PageableResponse convertPageableResponse =
+                PageableResponse.fromJson(responseData);
+            _listUsers = convertPageableResponse.content;
+            update();
+          } else {
+            throw Exception("Unexpected response format");
+          }
+        } else {
+          ApiChecker.checkApi(response);
+        }
       } else {
         throw Exception("Unexpected response format");
       }
@@ -81,10 +97,34 @@ class UserController extends GetxController implements GetxService {
 
     if (response.statusCode == 200) {
       _currentUser = User.fromJson(response.body);
+      print(response.body);
+      update();
     } else {
       ApiChecker.checkApi(response);
     }
     _loading = false;
+    update();
+  }
+
+  Future<User> getUserById(int id) async {
+    _loading = true;
+    update();
+    Response response = await repo.getUserById(id);
+    debugPrint("getUserById: ${response.statusCode}");
+
+    if (response.statusCode == 200) {
+      print(response.body);
+    } else {
+      ApiChecker.checkApi(response);
+    }
+
+    _loading = false;
+    update();
+    return User.fromJson(response.body);
+  }
+
+  void deleteImage() {
+    currentUser.image = null;
     update();
   }
 }

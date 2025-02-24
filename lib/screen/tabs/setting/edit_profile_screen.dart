@@ -1,4 +1,5 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rounded_date_picker/flutter_rounded_date_picker.dart';
 import 'package:get/get.dart';
@@ -25,6 +26,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       TextEditingController();
   final TextEditingController _emailTextController = TextEditingController();
   final TextEditingController _usernameTextController = TextEditingController();
+  final TextEditingController _universityTextController =
+      TextEditingController();
+  final TextEditingController _yearTextController = TextEditingController();
   // final TextEditingController _passwordTextController = TextEditingController();
   // final TextEditingController _confirmPasswordTextController =
   //     TextEditingController();
@@ -32,6 +36,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final _valueGender = Rx<String?>(null);
   // final _showPass = false.obs;
   // final _showConfirmPass = false.obs;
+  DateTime? _timeBirthday = null;
 
   @override
   void initState() {
@@ -46,7 +51,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         userController.currentUser.birthPlace ?? "";
     _emailTextController.text = userController.currentUser.email ?? "";
     _usernameTextController.text = userController.currentUser.username ?? "";
-
+    _universityTextController.text =
+        userController.currentUser.university ?? "";
+    _yearTextController.text = userController.currentUser.year.toString() ?? "";
     _valueGender.value = userController.currentUser.gender;
   }
 
@@ -89,6 +96,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 );
                 _dateBirthDayTextController.text =
                     DateConverter.dateTimeStringToDateOnly(dateTime.toString());
+                _timeBirthday = dateTime;
               },
             ),
             CustomTextField(
@@ -158,9 +166,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               padding: EdgeInsets.all(10),
               lable: "username".tr,
             ),
+            CustomTextField(
+              controller: _universityTextController,
+              padding: EdgeInsets.all(10),
+              lable: "University".tr,
+            ),
+            CustomTextField(
+              controller: _yearTextController,
+              padding: EdgeInsets.all(10),
+              lable: "Year".tr,
+            ),
             CustomButton(
               width: double.infinity,
-              buttonText: "sign_up".tr,
+              buttonText: "update".tr,
               margin: const EdgeInsets.all(10),
               onPressed: _updateProfile,
             ),
@@ -179,24 +197,23 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           alignment: Alignment.bottomRight,
           children: [
             CircleAvatar(
-                radius: 50,
-                backgroundColor:
-                    Colors.blue[200], // Màu nền nhạt hơn khi không có ảnh
-                backgroundImage: userController.currentUser.image != null
-                    ? NetworkImage(userController.currentUser
-                        .getLinkImageUrl(userController.currentUser.image!))
-                    : null, // Nếu có ảnh, dùng NetworkImage
-                child: controller.selectedPhoto == null
-                    ? Icon(Icons.person,
-                        size: 50, color: Colors.white) // Icon màu xám đậm hơn
-                    : ClipOval(
-                        child: Image.file(
-                          controller.selectedPhoto!,
-                          width: 100,
-                          height: 100,
-                          fit: BoxFit.cover,
-                        ),
-                      )),
+              radius: 50,
+              backgroundImage: userController.currentUser.image != null
+                  ? NetworkImage(userController.currentUser
+                      .getLinkImageUrl(userController.currentUser.image!))
+                  : AssetImage("assets/image/avatarDefault.jpg")
+                      as ImageProvider,
+              child: controller.selectedPhoto != null
+                  ? ClipOval(
+                      child: Image.file(
+                        controller.selectedPhoto!,
+                        fit: BoxFit.cover,
+                        width: 100,
+                        height: 100,
+                      ),
+                    )
+                  : null,
+            ),
             GestureDetector(
               onTap: () => _showImagePicker(context, controller),
               child: CircleAvatar(
@@ -233,16 +250,27 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 Navigator.pop(context);
               },
             ),
+            ListTile(
+              leading: Icon(Icons.camera_alt),
+              title: Text("Xóa ảnh"),
+              onTap: () {
+                UserController userController = Get.find<UserController>();
+                userController.deleteImage();
+                Navigator.pop(context);
+              },
+            ),
           ],
         );
       },
     );
   }
 
-  void _updateProfile() {
+  void _updateProfile() async {
     UserController userController = Get.find<UserController>();
     PhotoController photoController = Get.find<PhotoController>();
-
+    String? deviceToken = await FirebaseMessaging.instance.getToken();
+    String? dateBirthDay =
+        _timeBirthday != null ? _timeBirthday!.toIso8601String() + "Z" : null;
     if (_displayNameTextController.text.isEmpty ||
         _birthPlaceTextController.text.isEmpty ||
         _emailTextController.text.isEmpty ||
@@ -258,21 +286,26 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       return;
     }
 
-    photoController.uploadImageUrl();
-    userController.updateUserMySelf(User(
-      id: userController.currentUser.id,
-      displayName: _displayNameTextController.text,
-      birthPlace: _birthPlaceTextController.text,
-      email: _emailTextController.text,
-      username: _usernameTextController.text,
-      gender: _valueGender.value,
-      image: photoController.photo?.name,
-      hasPhoto: true,
-      password: userController.currentUser.password,
-      confirmPassword: userController.currentUser.password,
-      active: true,
-      dob: _dateBirthDayTextController.text,
-      changePass: false,
-    ));
+    await photoController.uploadImageUrl();
+    await userController.updateUserMySelf(User(
+        id: userController.currentUser.id,
+        displayName: _displayNameTextController.text,
+        birthPlace: _birthPlaceTextController.text,
+        email: _emailTextController.text,
+        username: _usernameTextController.text,
+        gender: _valueGender.value,
+        image: photoController.photo?.name ?? userController.currentUser.image,
+        hasPhoto: true,
+        password: userController.currentUser.password,
+        confirmPassword: userController.currentUser.password,
+        active: true,
+        dob: dateBirthDay,
+        changePass: null,
+        tokenDevice: deviceToken,
+        roles: userController.currentUser.roles,
+        year: _yearTextController.text.isNotEmpty
+            ? int.parse(_yearTextController.text)
+            : userController.currentUser.year,
+        university: _universityTextController.text));
   }
 }

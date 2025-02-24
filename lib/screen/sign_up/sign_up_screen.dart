@@ -1,4 +1,5 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rounded_date_picker/flutter_rounded_date_picker.dart';
@@ -43,7 +44,7 @@ class SignUpScreen extends StatelessWidget {
 
   final _showPass = false.obs;
   final _showConfirmPass = false.obs;
-
+  DateTime? _timeBirthday = null;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -149,6 +150,7 @@ class SignUpScreen extends StatelessWidget {
                 );
                 _dateBirthDayTextController.text =
                     DateConverter.dateTimeStringToDateOnly(dateTime.toString());
+                _timeBirthday = dateTime;
               },
             ),
             CustomTextField(
@@ -282,17 +284,18 @@ class SignUpScreen extends StatelessWidget {
     );
   }
 
-  _signup() {
+  _signup() async {
     String lastName = _lastNameTextController.text;
     String firstName = _firstNameTextController.text;
-    String? dateBirthDay = _dateBirthDayTextController.text;
+    String? dateBirthDay =
+        _timeBirthday != null ? _timeBirthday!.toIso8601String() + "Z" : null;
     String? birthPlace = _birthPlaceTextController.text;
     String? gender = _valueGender.value;
     String email = _emailTextController.text;
     String ussername = _ussernameTextController.text;
     String password = _paswordTextController.text;
     String confirmPassword = _confirmPasswordTextController.text;
-
+    String? deviceToken = await FirebaseMessaging.instance.getToken();
     if (lastName.isEmpty ||
         birthPlace.isEmpty ||
         firstName.isEmpty ||
@@ -323,13 +326,17 @@ class SignUpScreen extends StatelessWidget {
         countDayTracking: 0,
         gender: gender,
         hasPhoto: false,
-        tokenDevice: "",
+        tokenDevice: deviceToken,
         university: null,
         year: 0,
       ))
           .then((value) {
         if (value == 200 || value == 201) {
           showCustomSnackBar('register_success'.tr);
+          Get.offAll(SignInScreen(),
+              transition: Transition.cupertinoDialog,
+              duration: Duration(milliseconds: 500),
+              curve: Curves.easeIn);
         } else if (value == 400) {
           showCustomSnackBar('infomation_incorect'.tr);
         } else {

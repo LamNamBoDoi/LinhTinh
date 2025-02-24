@@ -4,6 +4,7 @@ import 'package:timesheet/controller/user_controller.dart';
 import 'package:timesheet/data/api/api_checker.dart';
 import 'package:timesheet/data/model/body/post/comment.dart';
 import 'package:timesheet/data/model/body/post/like.dart';
+import 'package:timesheet/data/model/body/post/media.dart';
 import 'package:timesheet/data/model/body/post/post.dart';
 import 'package:timesheet/data/model/body/post/post_response.dart';
 import 'package:timesheet/data/model/body/users/user.dart';
@@ -28,11 +29,11 @@ class PostController extends GetxController implements GetxService {
   List<Post> get postsCurrent => _postsCurrent;
   List<Post> get postsByUser => _postsByUser;
 
-  Future<void> resetListPost() async {
+  Future<void> resetListPost(String keyWord) async {
     _isLastPage = false;
     currentPage = 1;
     _postsCurrent.clear();
-    getNewPosts();
+    getNewPosts(keyWord);
   }
 
   bool checkLike(Post post) {
@@ -43,11 +44,11 @@ class PostController extends GetxController implements GetxService {
         false;
   }
 
-  Future<void> getNewPosts() async {
+  Future<void> getNewPosts(String keyWord) async {
     _isLoading = true;
     update();
 
-    Response response = await repo.getNewPosts("", currentPage, 5, 0);
+    Response response = await repo.getNewPosts(keyWord, currentPage, 5, 0);
     debugPrint("okeoke: ${response.statusCode}");
     if (response.statusCode == 200) {
       var responseData = response.body;
@@ -112,7 +113,7 @@ class PostController extends GetxController implements GetxService {
     update();
   }
 
-  Future<void> createPost(String content, User user) async {
+  Future<void> createPost(String content, User user, List<Media> media) async {
     _isLoading = true;
     update();
     Post post = Post(
@@ -121,13 +122,13 @@ class PostController extends GetxController implements GetxService {
         id: 0,
         likes: [],
         comments: [],
-        media: [],
+        media: media,
         user: user);
-
+    print(post.media.first.name);
     Response response = await repo.createPost(post);
     debugPrint("CreatePost: ${response.statusCode}");
     if (response.statusCode == 200) {
-      resetListPost();
+      resetListPost("");
     } else {
       ApiChecker.checkApi(response);
     }

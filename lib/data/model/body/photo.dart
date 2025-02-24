@@ -1,3 +1,5 @@
+import 'package:timesheet/utils/app_constants.dart';
+
 class Photo {
   final int id;
   final String contentType;
@@ -41,5 +43,10 @@ class Photo {
       'filePath': filePath,
       'isVideo': isVideo,
     };
+  }
+
+  String getLinkImageUrl(String typeImage) {
+    String newUrl = typeImage.replaceAll(" ", "%20").replaceAll(":", "%3A");
+    return "${AppConstants.BASE_URL}${AppConstants.GET_IMAGE_BY_NAME}$newUrl";
   }
 }

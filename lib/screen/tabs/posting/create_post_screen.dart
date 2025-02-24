@@ -3,8 +3,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:timesheet/controller/photo_controller.dart';
 import 'package:timesheet/controller/post_controller.dart';
 import 'package:timesheet/controller/user_controller.dart';
+import 'package:timesheet/data/model/body/post/media.dart';
 
 class CreatePostScreen extends StatefulWidget {
   @override
@@ -13,28 +15,33 @@ class CreatePostScreen extends StatefulWidget {
 
 class _CreatePostScreenState extends State<CreatePostScreen> {
   final TextEditingController _postTextController = TextEditingController();
-  XFile? _selectedImage;
   UserController userController = Get.find<UserController>();
   PostController postController = Get.find<PostController>();
-
+  PhotoController photoController = Get.find<PhotoController>();
+  List<Media> media = [];
   Future<void> _pickImage() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      setState(() {
-        _selectedImage = image;
-      });
-    }
+    photoController.pickImage(ImageSource.gallery);
   }
 
   void _submitPost() {
     String content = _postTextController.text.trim();
-    if (content.isEmpty && _selectedImage == null) {
+
+    if (content.isEmpty && photoController.selectedPhoto == null) {
       Get.snackbar("Lỗi", "Vui lòng nhập nội dung hoặc thêm ảnh!",
           backgroundColor: Colors.red, colorText: Colors.white);
       return;
     }
-    postController.createPost(content, userController.currentUser);
+    photoController.uploadImageUrl();
+    media.add(Media(
+      contentSize: photoController.photo!.contentSize,
+      contentType: photoController.photo!.contentType,
+      extension: photoController.photo!.extension,
+      id: null,
+      isVideo: photoController.photo!.isVideo,
+      name: photoController.photo!.name,
+      filePath: photoController.photo!.filePath,
+    ));
+    postController.createPost(content, userController.currentUser, media);
     Get.back();
   }
 
@@ -70,10 +77,14 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               children: [
                 CircleAvatar(
                   radius: 25,
-                  backgroundColor: Colors.grey[300],
-                  child: userController.currentUser.hasPhoto!
-                      ? null
-                      : Icon(Icons.person, size: 30, color: Colors.white),
+                  backgroundImage: userController.currentUser.image != null
+                      ? NetworkImage(userController.currentUser.getLinkImageUrl(
+                          userController
+                              .currentUser.image!)) // Hiển thị ảnh từ URL
+                      : null,
+                  child: userController.currentUser.image == null
+                      ? Icon(Icons.person, size: 30)
+                      : null,
                 ),
                 const SizedBox(width: 10),
                 Text(
@@ -95,7 +106,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               ),
             ),
           ),
-          if (_selectedImage != null)
+          if (photoController.selectedPhoto != null)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: Stack(
@@ -103,7 +114,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(10),
                     child: Image.file(
-                      File(_selectedImage!.path),
+                      File(photoController.selectedPhoto!.path),
                       width: double.infinity,
                       height: 200,
                       fit: BoxFit.cover,
@@ -113,7 +124,12 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                     top: 8,
                     right: 8,
                     child: GestureDetector(
-                      onTap: () => setState(() => _selectedImage = null),
+                      onTap: () {
+                        setState(() {
+                          media.clear();
+                          photoController.selectedPhoto = null;
+                        });
+                      },
                       child: Container(
                         height: 30,
                         width: 30,

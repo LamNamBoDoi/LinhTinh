@@ -4,6 +4,7 @@ import 'package:timesheet/controller/post_controller.dart';
 import 'package:timesheet/data/model/body/post/post.dart';
 import 'package:timesheet/screen/tabs/posting/create_post_screen.dart';
 import 'package:timesheet/screen/tabs/posting/post_card_screen.dart';
+import 'package:timesheet/screen/tabs/posting/search_screen.dart';
 
 class PostingScreen extends StatefulWidget {
   const PostingScreen({super.key});
@@ -22,7 +23,7 @@ class _PostingScreenState extends State<PostingScreen> {
     postController = Get.find<PostController>();
 
     // Tải bài post ban đầu
-    postController.resetListPost();
+    postController.resetListPost("");
 
     _scrollController.addListener(() {
       // Kiểm tra khi người dùng cuộn tới cuối danh sách
@@ -43,7 +44,7 @@ class _PostingScreenState extends State<PostingScreen> {
 
     // Gọi API hoặc phương thức để tải thêm dữ liệu
     postController.currentPage += 1;
-    await postController.getNewPosts();
+    await postController.getNewPosts("");
 
     setState(() {
       isLoadingMore = false;
@@ -83,7 +84,9 @@ class _PostingScreenState extends State<PostingScreen> {
                   ),
                   child: IconButton(
                     icon: const Icon(Icons.search, color: Colors.black),
-                    onPressed: () {},
+                    onPressed: () {
+                      Get.to(() => SearchScreen());
+                    },
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -111,7 +114,7 @@ class _PostingScreenState extends State<PostingScreen> {
             children: [
               RefreshIndicator(
                 onRefresh: () async {
-                  controller.resetListPost();
+                  controller.resetListPost("");
                 },
                 child: ListView.builder(
                   physics: const ClampingScrollPhysics(),

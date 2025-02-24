@@ -27,17 +27,11 @@ class SettingScreen extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 50,
-                    backgroundColor:
-                        Colors.blue[200], // Màu nền nhạt hơn khi không có ảnh
                     backgroundImage: controller.currentUser.image != null
                         ? NetworkImage(controller.currentUser
                             .getLinkImageUrl(controller.currentUser.image!))
-                        : null, // Nếu có ảnh, dùng NetworkImage
-                    child: controller.currentUser.image == null
-                        ? Icon(Icons.person,
-                            size: 50,
-                            color: Colors.white) // Icon màu xám đậm hơn
-                        : null,
+                        : AssetImage("assets/image/avatarDefault.jpg")
+                            as ImageProvider,
                   ),
                   SizedBox(height: 10),
                   Text(controller.currentUser.displayName!,
