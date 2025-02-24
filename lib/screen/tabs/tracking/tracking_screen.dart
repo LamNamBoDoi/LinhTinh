@@ -119,8 +119,6 @@ class _TrackingScreenState extends State<TrackingScreen> {
                           ),
                           GestureDetector(
                             onTap: () async {
-                              print(widget.update);
-
                               picker.DatePicker.showDatePicker(
                                 context,
                                 showTitleActions: true,

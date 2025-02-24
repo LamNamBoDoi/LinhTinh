@@ -10,6 +10,7 @@ class TrackingController extends GetxController implements GetxService {
 
   RxBool _isLoading = false.obs;
   RxBool get isLoading => _isLoading;
+  RxList<Tracking> listTrackingDay = <Tracking>[].obs;
 
   var _listTracking = <Tracking>[];
 

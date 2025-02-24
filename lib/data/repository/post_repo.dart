@@ -14,7 +14,20 @@ class PostRepo {
   Future<Response> getNewPosts(
       String keyWord, int pageIndex, int size, int status) async {
     return await apiClient.postData(
-        AppConstants.Get_NewPosts,
+        AppConstants.GET_NEW_POSTS,
+        jsonEncode({
+          "keyWord": keyWord,
+          "pageIndex": pageIndex,
+          "size": size,
+          "status": status
+        }),
+        null);
+  }
+
+  Future<Response> getNewPostsByUser(
+      String keyWord, int pageIndex, int size, int status) async {
+    return await apiClient.postData(
+        AppConstants.GET_NEW_POSTS_BY_USER,
         jsonEncode({
           "keyWord": keyWord,
           "pageIndex": pageIndex,

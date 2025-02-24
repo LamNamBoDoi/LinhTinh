@@ -10,6 +10,7 @@ import 'package:timesheet/data/model/body/users/user.dart';
 import 'package:timesheet/helper/date_converter.dart';
 import 'package:timesheet/utils/images.dart';
 import 'package:timesheet/view/custom_button.dart';
+import 'package:timesheet/view/custom_snackbar.dart';
 import 'package:timesheet/view/custom_text_field.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -274,38 +275,42 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (_displayNameTextController.text.isEmpty ||
         _birthPlaceTextController.text.isEmpty ||
         _emailTextController.text.isEmpty ||
-        _usernameTextController.text.isEmpty) {
-      Get.snackbar(
-        "Lỗi",
-        "Vui lòng nhập đầy đủ thông tin",
-        duration: Duration(seconds: 1),
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+        _usernameTextController.text.isEmpty ||
+        _universityTextController.text.isEmpty ||
+        _yearTextController.text.isEmpty) {
+      showCustomFlash("Dien day du di", context, isError: true);
       return;
     }
 
     await photoController.uploadImageUrl();
-    await userController.updateUserMySelf(User(
-        id: userController.currentUser.id,
-        displayName: _displayNameTextController.text,
-        birthPlace: _birthPlaceTextController.text,
-        email: _emailTextController.text,
-        username: _usernameTextController.text,
-        gender: _valueGender.value,
-        image: photoController.photo?.name ?? userController.currentUser.image,
-        hasPhoto: true,
-        password: userController.currentUser.password,
-        confirmPassword: userController.currentUser.password,
-        active: true,
-        dob: dateBirthDay,
-        changePass: null,
-        tokenDevice: deviceToken,
-        roles: userController.currentUser.roles,
-        year: _yearTextController.text.isNotEmpty
-            ? int.parse(_yearTextController.text)
-            : userController.currentUser.year,
-        university: _universityTextController.text));
+    await userController
+        .updateUserMySelf(User(
+            id: userController.currentUser.id,
+            displayName: _displayNameTextController.text,
+            birthPlace: _birthPlaceTextController.text,
+            email: _emailTextController.text,
+            username: _usernameTextController.text,
+            gender: _valueGender.value,
+            image:
+                photoController.photo?.name ?? userController.currentUser.image,
+            hasPhoto: true,
+            password: userController.currentUser.password,
+            confirmPassword: userController.currentUser.password,
+            active: true,
+            dob: dateBirthDay,
+            changePass: null,
+            tokenDevice: deviceToken,
+            roles: userController.currentUser.roles,
+            year: _yearTextController.text.isNotEmpty
+                ? int.parse(_yearTextController.text)
+                : userController.currentUser.year,
+            university: _universityTextController.text))
+        .then((response) {
+      if (response == 200) {
+        showCustomFlash("success".tr, context, isError: false);
+      } else {
+        showCustomFlash("fail".tr, context);
+      }
+    });
   }
 }

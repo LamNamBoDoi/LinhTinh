@@ -17,7 +17,7 @@ class _UsersScreenState extends State<UsersScreen> {
   @override
   void initState() {
     super.initState();
-    Get.find<UserController>().getListUsersPage();
+    Get.find<UserController>().restartListUser();
   }
 
   void _searchUsers(String query) {
@@ -75,7 +75,7 @@ class _UsersScreenState extends State<UsersScreen> {
               ),
 
               controller.loading == true
-                  ? Center(
+                  ? const Center(
                       child:
                           CircularProgressIndicator(color: Colors.blueAccent),
                     )

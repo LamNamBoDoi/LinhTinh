@@ -22,21 +22,14 @@ class _PersonalPageScreenState extends State<PersonalPageScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchUser();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      postController.resetListPost(widget.displayName);
-    });
+    _fetchUserPost();
   }
 
-  Future<void> _fetchUser() async {
+  Future<void> _fetchUserPost() async {
     try {
-      final fetchedUser = await userController.getUserById(widget.userId);
-
-      if (mounted) {
-        setState(() {
-          user = fetchedUser;
-        });
-      }
+      user = await userController.getUserById(widget.userId);
+      await postController.resetListPost(widget.displayName);
+      print(postController.postsByUser.length);
     } catch (e) {
       debugPrint("Error loading user: $e");
     }
@@ -70,16 +63,19 @@ class _PersonalPageScreenState extends State<PersonalPageScreen> {
 
             const Divider(),
 
-            Expanded(
-              child: ListView.builder(
-                itemCount: postController.postsCurrent.length,
+            Expanded(child: GetBuilder<PostController>(builder: (controller) {
+              if (controller.isLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              return ListView.builder(
+                physics: const ClampingScrollPhysics(),
+                itemCount: postController.postsByUser.length,
                 itemBuilder: (context, index) {
-                  final post = postController.postsCurrent[index];
-
+                  final post = postController.postsByUser[index];
                   return PostCard(post: post, postController: postController);
                 },
-              ),
-            ),
+              );
+            })),
           ],
         );
       })),

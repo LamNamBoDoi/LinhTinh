@@ -44,7 +44,7 @@ class _PostingScreenState extends State<PostingScreen> {
 
     // Gọi API hoặc phương thức để tải thêm dữ liệu
     postController.currentPage += 1;
-    await postController.getNewPosts("");
+    await postController.getNewPosts();
 
     setState(() {
       isLoadingMore = false;

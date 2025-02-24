@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:timesheet/data/api/api_checker.dart';
 import 'package:timesheet/data/model/body/users/pageable_response.dart';
@@ -89,7 +90,7 @@ class UserController extends GetxController implements GetxService {
     update();
   }
 
-  Future<void> updateUserMySelf(User user) async {
+  Future<int?> updateUserMySelf(User user) async {
     _loading = true;
     update();
     Response response = await repo.updateUserMySelf(user);
@@ -98,12 +99,12 @@ class UserController extends GetxController implements GetxService {
     if (response.statusCode == 200) {
       _currentUser = User.fromJson(response.body);
       print(response.body);
-      update();
     } else {
       ApiChecker.checkApi(response);
     }
     _loading = false;
     update();
+    return response.statusCode;
   }
 
   Future<User> getUserById(int id) async {

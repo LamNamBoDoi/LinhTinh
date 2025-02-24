@@ -37,11 +37,8 @@ class PhotoController extends GetxController implements GetxService {
     debugPrint("UploadImage: ${response.statusCode}");
 
     if (response.statusCode == 200) {
-      print(response.body);
       _photo = Photo.fromJson(response.body);
-      Get.snackbar("Thành công", "Upload ảnh thành công!");
     } else {
-      Get.snackbar("Lỗi", "Upload thất bại: ${response.body}");
       ApiChecker.checkApi(response);
     }
     isLoading = false;

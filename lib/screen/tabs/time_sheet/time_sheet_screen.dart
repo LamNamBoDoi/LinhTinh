@@ -24,8 +24,7 @@ class _TimeSheetScreenState extends State<TimeSheetScreen> {
   DateTime _selectedDay = DateTime.now();
   DateTime _focuseDay = DateTime.now();
   RxBool attendanced = false.obs;
-  final TrackingController trackingController = Get.find<TrackingController>();
-  RxList<Tracking> listTrackingDay = <Tracking>[].obs;
+  TrackingController trackingController = Get.find<TrackingController>();
   Future<void> _onRefresh() {
     return Get.find<TimeSheetController>().getTimeSheet();
   }
@@ -182,7 +181,8 @@ class _TimeSheetScreenState extends State<TimeSheetScreen> {
                                   child: Obx(
                                     () => Center(
                                       child: Text(
-                                        listTrackingDay.length
+                                        trackingController
+                                            .listTrackingDay.length
                                             .toString(), // Hiển thị số lượng tracking
                                         style: const TextStyle(
                                             color: Colors.white,
@@ -195,10 +195,11 @@ class _TimeSheetScreenState extends State<TimeSheetScreen> {
                             ),
                             Expanded(
                                 child: ListView.builder(
-                                    itemCount: listTrackingDay.length,
+                                    itemCount: trackingController
+                                        .listTrackingDay.length,
                                     itemBuilder: (context, index) {
-                                      Tracking tracking =
-                                          listTrackingDay[index];
+                                      Tracking tracking = trackingController
+                                          .listTrackingDay[index];
                                       return ListTile(
                                         onTap: () =>
                                             showDialogTracking(tracking),
@@ -314,14 +315,15 @@ class _TimeSheetScreenState extends State<TimeSheetScreen> {
 
   List<Tracking> getTrackingDate() {
     trackingController.getTracking();
-    listTrackingDay.clear();
+    trackingController.listTrackingDay.clear();
     for (Tracking tracking in trackingController.listTracking) {
       if (isSameDay(
           DateTime.fromMillisecondsSinceEpoch(tracking.date!), _selectedDay)) {
-        listTrackingDay.add(tracking);
+        trackingController.listTrackingDay.add(tracking);
       }
     }
-    return listTrackingDay;
+    print(trackingController.listTrackingDay.length);
+    return trackingController.listTrackingDay;
   }
 
   void showDialogTracking(Tracking tracking) {

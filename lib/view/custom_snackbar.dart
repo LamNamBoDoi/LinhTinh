@@ -18,7 +18,7 @@ void showCustomSnackBar(String message, {bool isError = true}) {
         bottom: Dimensions.PADDING_SIZE_SMALL,
         left: Dimensions.PADDING_SIZE_SMALL,
       ),
-      duration: const Duration(seconds: 3),
+      duration: const Duration(seconds: 2),
       backgroundColor: isError ? Colors.red : Colors.green,
       behavior: SnackBarBehavior.floating,
       shape: RoundedRectangleBorder(

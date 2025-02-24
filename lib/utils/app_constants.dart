@@ -20,7 +20,8 @@ class AppConstants {
   static const String UPDATE_BLOCK_USER_BY_ID = '/mita/users/lock/';
   static const String GET_USERS = '/mita/users/searchByPage';
   static const String GET_IMAGE_BY_NAME = '/mita/public/images/';
-  static const String Get_NewPosts = '/mita/posts/get-news';
+  static const String GET_NEW_POSTS = '/mita/posts/get-news';
+  static const String GET_NEW_POSTS_BY_USER = '/mita/posts/get-news-by-user';
   static const String LIKE_POST = '/mita/posts/likes/';
   static const String COMMENT_POST = '/mita/posts/comments/';
   static const String CREATE_POST = '/mita/posts/create';

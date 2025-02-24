@@ -14,10 +14,17 @@ class _SearchScreenState extends State<SearchScreen> {
   final UserController userController = Get.find<UserController>();
   List<User> searchResults = [];
   @override
+  @override
   void initState() {
     super.initState();
-    if (userController.listUsers == []) {
-      userController.getListUsersPage();
+    _fetchUsers();
+  }
+
+  Future<void> _fetchUsers() async {
+    if (userController.listUsers.isEmpty) {
+      await userController.getListUsersPage();
+      print("Số lượng user sau khi fetch: ${userController.listUsers.length}");
+      setState(() {}); // Cập nhật lại UI sau khi có dữ liệu
     }
   }
 

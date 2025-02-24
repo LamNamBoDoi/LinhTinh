@@ -33,7 +33,8 @@ class PostController extends GetxController implements GetxService {
     _isLastPage = false;
     currentPage = 1;
     _postsCurrent.clear();
-    getNewPosts(keyWord);
+    _postsByUser.clear();
+    keyWord == "" ? getNewPosts() : getNewPostsByUser(keyWord);
   }
 
   bool checkLike(Post post) {
@@ -44,20 +45,41 @@ class PostController extends GetxController implements GetxService {
         false;
   }
 
-  Future<void> getNewPosts(String keyWord) async {
+  Future<void> getNewPosts() async {
     _isLoading = true;
     update();
 
-    Response response = await repo.getNewPosts(keyWord, currentPage, 5, 0);
+    Response response = await repo.getNewPosts("", currentPage, 5, 0);
     debugPrint("okeoke: ${response.statusCode}");
     if (response.statusCode == 200) {
       var responseData = response.body;
-
       if (responseData is Map<String, dynamic>) {
         PostResponse convertPostResponse = PostResponse.fromJson(responseData);
-
         _posts = convertPostResponse.content;
         _postsCurrent.addAll(_posts);
+      } else {
+        throw Exception("Unexpected response format");
+      }
+    } else {
+      ApiChecker.checkApi(response);
+    }
+    _isLoading = false;
+    update();
+  }
+
+  Future<void> getNewPostsByUser(String keyWord) async {
+    _isLoading = true;
+    update();
+
+    Response response =
+        await repo.getNewPostsByUser(keyWord, currentPage, 5, 0);
+    debugPrint("okeoke: ${response.statusCode}");
+    if (response.statusCode == 200) {
+      var responseData = response.body;
+      if (responseData is Map<String, dynamic>) {
+        PostResponse convertPostResponse = PostResponse.fromJson(responseData);
+        _posts = convertPostResponse.content;
+        _postsByUser.addAll(_posts);
       } else {
         throw Exception("Unexpected response format");
       }
