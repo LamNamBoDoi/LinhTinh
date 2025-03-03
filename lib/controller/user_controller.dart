@@ -38,6 +38,9 @@ class UserController extends GetxController implements GetxService {
     print(response.body);
     if (response.statusCode == 200) {
       _currentUser = User.fromJson(response.body);
+      if (_currentUser.username == "admin" &&
+          _currentUser.email == "admin@globits.net") isAdmin = true;
+      update();
     } else {
       ApiChecker.checkApi(response);
     }
@@ -107,6 +110,21 @@ class UserController extends GetxController implements GetxService {
     return response.statusCode;
   }
 
+  Future<int?> updateUserById(User user) async {
+    _loading = true;
+    update();
+
+    Response response = await repo.updateUserById(user);
+    debugPrint("updateUserById: ${response.statusCode}");
+    if (response.statusCode == 200) {
+    } else {
+      ApiChecker.checkApi(response);
+    }
+    _loading = false;
+    update();
+    return response.statusCode;
+  }
+
   Future<User> getUserById(int id) async {
     _loading = true;
     update();
@@ -122,6 +140,36 @@ class UserController extends GetxController implements GetxService {
     _loading = false;
     update();
     return User.fromJson(response.body);
+  }
+
+  Future<int?> blockUser(int id) async {
+    _loading = true;
+    update();
+    Response response = await repo.blockUser(id.toString());
+    debugPrint("blockUser: ${response.statusCode}");
+
+    if (response.statusCode == 200) {
+    } else {
+      ApiChecker.checkApi(response);
+    }
+
+    _loading = false;
+    update();
+    return response.statusCode;
+  }
+
+  Future<void> updateTokenDevice(String tokenDevice) async {
+    _loading = true;
+    update();
+    Response response = await repo.updateTokenDevice(tokenDevice);
+    debugPrint("updateTokenDevice: ${response.statusCode}");
+    if (response.statusCode == 200) {
+    } else {
+      ApiChecker.checkApi(response);
+    }
+
+    _loading = false;
+    update();
   }
 
   void deleteImage() {

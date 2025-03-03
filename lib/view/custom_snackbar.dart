@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:quickalert/quickalert.dart';
 import '../helper/responsive_helper.dart';
 import '../utils/dimensions.dart';
 import '../utils/styles.dart';
@@ -68,4 +69,16 @@ void showCustomFlash(String message, BuildContext context,
       ),
     );
   }
+}
+
+void showCustomConfirm(BuildContext context, String text, Function onConfirm) {
+  QuickAlert.show(
+    context: context,
+    type: QuickAlertType.confirm,
+    text: text,
+    confirmBtnText: 'Yes',
+    cancelBtnText: 'No',
+    confirmBtnColor: Theme.of(context).secondaryHeaderColor,
+    onConfirmBtnTap: () => onConfirm(),
+  );
 }

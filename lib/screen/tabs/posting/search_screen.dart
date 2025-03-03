@@ -57,15 +57,15 @@ class _SearchScreenState extends State<SearchScreen> {
         title: TextField(
           controller: _searchController,
           autofocus: true,
-          decoration: const InputDecoration(
-            hintText: "Tìm kiếm người dùng...",
+          decoration: InputDecoration(
+            hintText: "search_for_users...".tr,
             border: InputBorder.none,
           ),
           onChanged: _searchUsers,
         ),
       ),
       body: searchResults.isEmpty
-          ? const Center(child: Text("Nhập từ khóa để tìm kiếm"))
+          ? Center(child: Text("enter_keywords_to_search".tr))
           : ListView.builder(
               padding: const EdgeInsets.symmetric(vertical: 10),
               itemCount: searchResults.length,

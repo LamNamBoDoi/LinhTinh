@@ -1,5 +1,5 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_rx/get_rx.dart';
 import 'package:timesheet/data/model/body/time_sheet.dart';
 import 'package:timesheet/data/repository/timesheet_repo.dart';
 import 'dart:io';
@@ -10,15 +10,29 @@ class TimeSheetController extends GetxController implements GetxService {
   final TimeSheetRepo repo;
   TimeSheetController({required this.repo});
 
-  RxBool _isLoading = false.obs;
-  RxBool get isLoading => _isLoading;
-
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
+  bool attendanced = false;
   List<TimeSheet> _timeSheets = <TimeSheet>[];
   List<TimeSheet> get timeSheets => _timeSheets;
 
-  RxDouble totalDayInMonth = 0.0.obs;
-  RxDouble totalDayCheckinInMonth = 0.0.obs;
-  RxDouble progressRate = 0.0.obs;
+  double totalDayInMonth = 0.0;
+  double totalDayCheckinInMonth = 0.0;
+  double progressRate = 0.0;
+  DateTime selectedDay = DateTime.now();
+  DateTime focusedDay = DateTime.now();
+  Map<DateTime, List<TimeSheet>> _events = {};
+  Map<DateTime, List<TimeSheet>> get events => _events;
+  void updateSelectedDay(DateTime selectedDay, DateTime focusedDay) {
+    this.selectedDay = selectedDay;
+    this.focusedDay = focusedDay; // Cập nhật lại ngày khi người dùng chọn
+    update(); // Cập nhật UI
+  }
+
+  void updateFocusedDay(DateTime focusedDay) {
+    this.focusedDay = focusedDay;
+    update(); // Cập nhật UI khi người dùng lướt qua tháng/năm
+  }
 
   void handleProgressInMonth(DateTime dateTime) {
     double myTotalDayInMonth =
@@ -32,24 +46,31 @@ class TimeSheetController extends GetxController implements GetxService {
           dateTime.month == dateCheckin.month) {
         myTotalDayCheckInMonth += 1;
       }
-      progressRate.value =
-          ((100 / myTotalDayInMonth) * myTotalDayCheckInMonth) / 100;
-      totalDayInMonth.value = myTotalDayInMonth;
-      totalDayCheckinInMonth.value = myTotalDayCheckInMonth;
+      progressRate = ((100 / myTotalDayInMonth) * myTotalDayCheckInMonth) / 100;
+      totalDayInMonth = myTotalDayInMonth;
+      totalDayCheckinInMonth = myTotalDayCheckInMonth;
     }
+    update();
   }
 
-  Map<DateTime, List<TimeSheet>> getEventsCalendar() {
-    Map<DateTime, List<TimeSheet>> _event = {};
+  void getEventsCalendar() {
     for (var element in _timeSheets) {
       DateTime? dateTime =
           DateTime.fromMillisecondsSinceEpoch(element.dateAttendance!);
 
       DateTime key =
           DateTime(dateTime.year, dateTime.month, dateTime.day).toLocal();
-      _event[key] = [element];
+      _events[key] = [element];
     }
-    return _event;
+    update();
+  }
+
+  init() async {
+    selectedDay = DateTime.now();
+    focusedDay = DateTime.now();
+    update();
+    await getTimeSheet();
+    getEventsCalendar();
   }
 
   Future<String?> getWifiIP() async {
@@ -78,41 +99,42 @@ class TimeSheetController extends GetxController implements GetxService {
   }
 
   Future<int> checkIn() async {
-    _isLoading.value = true;
-
+    _isLoading = true;
+    update();
     String? wifiIP = await getWifiIP();
     Response response = await repo.checkInTimeSheet(wifiIP.toString());
-    print(response.body);
+    debugPrint("checkIn: ${response.statusCode}");
+
     if (response.statusCode == 200) {
       TimeSheet? timeSheet = TimeSheet.fromJson(response.body);
-
+      attendanced = true;
       timeSheets.add(timeSheet);
     } else {
       ApiChecker.checkApi(response);
     }
-    _isLoading.value = false;
-
+    _isLoading = false;
+    update();
     return response.statusCode!;
   }
 
   Future<int> getTimeSheet() async {
-    // _isLoading.value = true;
-
+    _isLoading = true;
+    update();
     Response response = await repo.getTimeSheet();
-    if (response.statusCode == 200) {
-      print(response.body);
+    debugPrint("getTimeSheet: ${response.statusCode}");
 
+    if (response.statusCode == 200) {
       List<TimeSheet> convertListTimeSheets = (response.body as List<dynamic>)
           .map((json) => TimeSheet.fromJson(json))
           .toList();
 
       _timeSheets = convertListTimeSheets;
-      //handleProgressInMonth(DateTime.now());
+      handleProgressInMonth(DateTime.now());
     } else {
       ApiChecker.checkApi(response);
     }
-    // _isLoading.value = false;
-
+    _isLoading = false;
+    update();
     return response.statusCode!;
   }
 }

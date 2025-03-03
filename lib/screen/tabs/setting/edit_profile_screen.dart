@@ -14,8 +14,11 @@ import 'package:timesheet/view/custom_snackbar.dart';
 import 'package:timesheet/view/custom_text_field.dart';
 
 class EditProfileScreen extends StatefulWidget {
+  EditProfileScreen({super.key, required this.user});
+
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
+  User user;
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
@@ -38,30 +41,31 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   // final _showPass = false.obs;
   // final _showConfirmPass = false.obs;
   DateTime? _timeBirthday = null;
-
+  RxBool _activeUser = true.obs;
   @override
   void initState() {
     super.initState();
-    UserController userController = Get.find<UserController>();
     PhotoController photoController = Get.find<PhotoController>();
     photoController.selectedPhoto = null;
-    _displayNameTextController.text =
-        userController.currentUser.displayName ?? "";
-    _dateBirthDayTextController.text = userController.currentUser.dob ?? "";
-    _birthPlaceTextController.text =
-        userController.currentUser.birthPlace ?? "";
-    _emailTextController.text = userController.currentUser.email ?? "";
-    _usernameTextController.text = userController.currentUser.username ?? "";
-    _universityTextController.text =
-        userController.currentUser.university ?? "";
-    _yearTextController.text = userController.currentUser.year.toString() ?? "";
-    _valueGender.value = userController.currentUser.gender;
+    _activeUser = RxBool(widget.user.active ?? true);
+    _displayNameTextController.text = widget.user.displayName ?? "";
+    _dateBirthDayTextController.text = widget.user.dob ?? "";
+    _birthPlaceTextController.text = widget.user.birthPlace ?? "";
+    _emailTextController.text = widget.user.email ?? "";
+    _usernameTextController.text = widget.user.username ?? "";
+    _universityTextController.text = widget.user.university ?? "";
+    _yearTextController.text = widget.user.year.toString() ?? "";
+    _valueGender.value = widget.user.gender;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Chỉnh sửa hồ sơ")),
+      appBar: AppBar(
+        title: Text("edit_profile".tr, style: TextStyle(color: Colors.black)),
+        iconTheme: IconThemeData(color: Colors.black),
+        backgroundColor: Theme.of(context).secondaryHeaderColor,
+      ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(20.0),
         child: Column(
@@ -69,6 +73,32 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           children: [
             _buildAvatarSection(context),
             SizedBox(height: 20),
+            Obx(
+              () => SwitchListTile(
+                title: Text("account_status".tr,
+                    style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).textTheme.bodyLarge!.color)),
+                value: _activeUser.value,
+                onChanged: (value) {
+                  showCustomConfirm(context, "Thay doi trang trai tai khoan",
+                      () {
+                    _activeUser.value = value;
+                    Get.find<UserController>()
+                        .blockUser(widget.user.id!)
+                        .then((response) {
+                      if (value == 200 || value == 201) {
+                        showCustomSnackBar("success".tr, isError: false);
+                      } else {
+                        showCustomSnackBar("fail".tr, isError: true);
+                      }
+                      Navigator.pop(context);
+                    });
+                  });
+                },
+              ),
+            ),
             CustomTextField(
               controller: _displayNameTextController,
               padding: EdgeInsets.all(10),
@@ -192,16 +222,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget _buildAvatarSection(BuildContext context) {
     return GetBuilder<PhotoController>(
       builder: (controller) {
-        UserController userController = Get.find<UserController>();
-
         return Stack(
           alignment: Alignment.bottomRight,
           children: [
             CircleAvatar(
               radius: 50,
-              backgroundImage: userController.currentUser.image != null
-                  ? NetworkImage(userController.currentUser
-                      .getLinkImageUrl(userController.currentUser.image!))
+              backgroundImage: widget.user.image != null
+                  ? NetworkImage(
+                      widget.user.getLinkImageUrl(widget.user.image!))
                   : AssetImage("assets/image/avatarDefault.jpg")
                       as ImageProvider,
               child: controller.selectedPhoto != null
@@ -270,6 +298,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     UserController userController = Get.find<UserController>();
     PhotoController photoController = Get.find<PhotoController>();
     String? deviceToken = await FirebaseMessaging.instance.getToken();
+
     String? dateBirthDay =
         _timeBirthday != null ? _timeBirthday!.toIso8601String() + "Z" : null;
     if (_displayNameTextController.text.isEmpty ||
@@ -281,36 +310,44 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       showCustomFlash("Dien day du di", context, isError: true);
       return;
     }
-
+    User user = User(
+        id: widget.user.id,
+        displayName: _displayNameTextController.text,
+        birthPlace: _birthPlaceTextController.text,
+        email: _emailTextController.text,
+        username: _usernameTextController.text,
+        gender: _valueGender.value,
+        image: photoController.photo?.name ?? widget.user.image,
+        hasPhoto: true,
+        password: widget.user.password,
+        confirmPassword: widget.user.password,
+        active: true,
+        dob: dateBirthDay,
+        changePass: null,
+        tokenDevice: deviceToken,
+        roles: widget.user.roles,
+        year: _yearTextController.text.isNotEmpty
+            ? int.parse(_yearTextController.text)
+            : widget.user.year,
+        university: _universityTextController.text);
     await photoController.uploadImageUrl();
-    await userController
-        .updateUserMySelf(User(
-            id: userController.currentUser.id,
-            displayName: _displayNameTextController.text,
-            birthPlace: _birthPlaceTextController.text,
-            email: _emailTextController.text,
-            username: _usernameTextController.text,
-            gender: _valueGender.value,
-            image:
-                photoController.photo?.name ?? userController.currentUser.image,
-            hasPhoto: true,
-            password: userController.currentUser.password,
-            confirmPassword: userController.currentUser.password,
-            active: true,
-            dob: dateBirthDay,
-            changePass: null,
-            tokenDevice: deviceToken,
-            roles: userController.currentUser.roles,
-            year: _yearTextController.text.isNotEmpty
-                ? int.parse(_yearTextController.text)
-                : userController.currentUser.year,
-            university: _universityTextController.text))
-        .then((response) {
-      if (response == 200) {
-        showCustomFlash("success".tr, context, isError: false);
-      } else {
-        showCustomFlash("fail".tr, context);
-      }
-    });
+    if (widget.user.tokenDevice != deviceToken) {
+      userController.updateTokenDevice(deviceToken!);
+    }
+    userController.isAdmin == false
+        ? await userController.updateUserMySelf(user).then((response) {
+            if (response == 200) {
+              showCustomFlash("success".tr, context, isError: false);
+            } else {
+              showCustomFlash("fail".tr, context);
+            }
+          })
+        : userController.updateUserById(user).then((response) {
+            if (response == 200) {
+              showCustomFlash("success".tr, context, isError: false);
+            } else {
+              showCustomFlash("fail".tr, context);
+            }
+          });
   }
 }

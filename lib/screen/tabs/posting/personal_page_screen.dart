@@ -61,7 +61,10 @@ class _PersonalPageScreenState extends State<PersonalPageScreen> {
             ),
             const SizedBox(height: 5),
 
-            const Divider(),
+            Divider(
+              height: 1,
+              thickness: 1,
+            ),
 
             Expanded(child: GetBuilder<PostController>(builder: (controller) {
               if (controller.isLoading) {

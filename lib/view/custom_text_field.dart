@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:timesheet/utils/color_resources.dart';
 
 class CustomTextField extends StatelessWidget {
   const CustomTextField(
@@ -48,8 +49,8 @@ class CustomTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: padding ?? const EdgeInsets.all(0),
-      child: SizedBox(
-        height: height,
+      child: Container(
+        height: height ?? 50,
         width: width,
         child: Stack(alignment: AlignmentDirectional.centerEnd, children: [
           TextFormField(
@@ -58,27 +59,34 @@ class CustomTextField extends StatelessWidget {
               // Nếu onChange được truyền vào, gọi nó với text mới
               onChange?.call(text);
             },
+            maxLines: isShowPass == false ? 1 : null,
             autofocus: autofocus ?? false,
             controller: controller,
             textAlign: textAlign ?? TextAlign.left,
             obscureText: isShowPass != null ? !isShowPass! : false,
             textInputAction: textInputAction,
             keyboardType: inputType,
-            style: TextStyle(color: colorText ?? Colors.black),
+            style: TextStyle(
+                color:
+                    colorText ?? Theme.of(context).textTheme.bodyLarge!.color),
             decoration: InputDecoration(
               labelText: lable,
-              hintStyle: TextStyle(color: colorHint ?? Colors.black),
+              hintStyle: TextStyle(
+                  color: colorHint ??
+                      Theme.of(context).textTheme.bodyLarge!.color),
               hintText: hintText,
               prefixIcon: icon,
-              contentPadding: contentPadding ?? EdgeInsets.only(left: 20),
+              contentPadding: contentPadding ?? EdgeInsets.all(10),
               border: OutlineInputBorder(
                   // tổng
-                  borderSide: const BorderSide(color: Colors.grey, width: 2),
+                  borderSide:
+                      BorderSide(color: ColorResources.ssColor[4], width: 2),
                   borderRadius: BorderRadius.all(
                       radius ?? radius ?? Radius.circular(30))),
               enabledBorder: OutlineInputBorder(
                   // khi không select
-                  borderSide: const BorderSide(color: Colors.grey, width: 1),
+                  borderSide:
+                      BorderSide(color: ColorResources.ssColor[4], width: 1),
                   borderRadius:
                       BorderRadius.all(radius ?? const Radius.circular(30))),
               focusedBorder: OutlineInputBorder(

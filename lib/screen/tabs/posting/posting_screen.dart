@@ -58,20 +58,19 @@ class _PostingScreenState extends State<PostingScreen> {
   }
 
   @override
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: Theme.of(context).secondaryHeaderColor,
         elevation: 0.5,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              "Bảng tin",
+              "message_board".tr,
               style: TextStyle(
-                color: Colors.blue[800],
-                fontSize: 26,
+                color: Colors.black,
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
             ),

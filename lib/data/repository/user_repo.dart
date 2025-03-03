@@ -45,4 +45,9 @@ class UserRepo {
     return await apiClient
         .getData("${AppConstants.UPDATE_BLOCK_USER_BY_ID}$userId");
   }
+
+  Future<Response> updateTokenDevice(String tokenDevice) async {
+    return await apiClient.getData(
+        "${AppConstants.UPDATE_TOKEN_DEVICE}?tokenDevice=$tokenDevice");
+  }
 }

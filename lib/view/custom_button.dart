@@ -32,7 +32,7 @@ class CustomButton extends StatelessWidget {
           ? Theme.of(context).disabledColor
           : off!
               ? Colors.grey.withOpacity(0.5)
-              : Theme.of(context).primaryColor,
+              : Theme.of(context).secondaryHeaderColor,
       minimumSize: Size(width != null ? width! : Dimensions.WEB_MAX_WIDTH,
           height != null ? height! : 50),
       padding: EdgeInsets.zero,
@@ -64,9 +64,8 @@ class CustomButton extends StatelessWidget {
                   Text(buttonText ?? '',
                       textAlign: TextAlign.center,
                       style: robotoBold.copyWith(
-                        color: off!
-                            ? Theme.of(context).primaryColor
-                            : Theme.of(context).cardColor,
+                        color:
+                            off! ? Theme.of(context).cardColor : Colors.black,
                         fontSize: fontSize ?? Dimensions.fontSizeLarge,
                       )),
                 ]),

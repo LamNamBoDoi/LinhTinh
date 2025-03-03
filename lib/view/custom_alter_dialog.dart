@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:timesheet/utils/color_resources.dart';
 import 'package:timesheet/utils/dimensions.dart';
 
@@ -42,8 +43,8 @@ class CustomAlertDialog extends StatelessWidget {
               onPressed: () {
                 Navigator.of(context).pop(); // Đóng dialog
               },
-              child: const Text(
-                "Đóng",
+              child: Text(
+                "close".tr,
                 style: TextStyle(
                     color: Colors.green,
                     fontSize: Dimensions.FONT_SIZE_OVER_LARGE,

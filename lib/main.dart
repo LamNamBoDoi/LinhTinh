@@ -5,9 +5,11 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
 import 'package:timesheet/firebase_options.dart';
+import 'package:timesheet/helper/notification_helper.dart';
 import 'package:timesheet/theme/dark_theme.dart';
 import 'package:timesheet/theme/light_theme.dart';
 import 'package:timesheet/theme/theme_controller.dart';
@@ -29,12 +31,22 @@ Future<void> main() async {
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   // kiểm tra có phải điện thoại di động
   if (ResponsiveHelper.isMobilePhone()) {
-    // ghi đè HTTP
     HttpOverrides.global = MyHttpOverrides();
   }
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  try {
+    if (GetPlatform.isMobile) {
+      await NotificationHelper.requestNotificationPermission(); // Yêu cầu quyền
+      final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+          FlutterLocalNotificationsPlugin();
+      await NotificationHelper.initialize(flutterLocalNotificationsPlugin);
+      FirebaseMessaging.onBackgroundMessage(myBackgroundMessageHandler);
+    }
+  } catch (e) {
+    print('Lỗi khi khởi tạo thông báo: $e');
+  }
 
   Map<String, Map<String, String>> _languages = await di.init();
 

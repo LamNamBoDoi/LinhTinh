@@ -5,7 +5,6 @@ import 'package:timesheet/controller/auth_controller.dart';
 import 'package:timesheet/controller/user_controller.dart';
 import 'package:timesheet/screen/home/home_screen.dart';
 import 'package:timesheet/screen/sign_up/sign_up_screen.dart';
-import 'package:timesheet/utils/color_resources.dart';
 import 'package:timesheet/utils/dimensions.dart';
 import 'package:timesheet/utils/images.dart';
 import 'package:timesheet/view/custom_button.dart';
@@ -113,11 +112,15 @@ class SignInScreen extends StatelessWidget {
                       text: TextSpan(style: TextStyle(fontSize: 14), children: [
                         TextSpan(
                             text: "don't_have_an_account? ".tr,
-                            style: const TextStyle(color: Colors.black)),
+                            style: TextStyle(
+                                color: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge!
+                                    .color)),
                         TextSpan(
                             text: "sign_up".tr,
                             style: TextStyle(
-                                color: ColorResources.COLOR_PRIMARY,
+                                color: Theme.of(context).secondaryHeaderColor,
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold),
                             recognizer: TapGestureRecognizer()
@@ -141,8 +144,10 @@ class SignInScreen extends StatelessWidget {
     if (username.isEmpty || password.isEmpty) {
       showCustomSnackBar("you_need_enter_your_acount".tr);
     } else {
-      Get.find<AuthController>().login(username, password).then((value) {
+      Get.find<AuthController>().login(username, password).then((value) async {
         if (value == 200) {
+          await Get.find<UserController>().getCurrentUser();
+          showCustomSnackBar("success".tr, isError: false);
           Get.offAll(HomeScreen(),
               transition: Transition.cupertinoDialog,
               duration: Duration(milliseconds: 500),

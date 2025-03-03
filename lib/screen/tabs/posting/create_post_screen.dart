@@ -56,15 +56,15 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
           icon: const Icon(Icons.close, color: Colors.black),
           onPressed: () => Get.back(),
         ),
-        title: const Text(
-          "Tạo bài viết",
-          style: TextStyle(
+        title: Text(
+          "create_articles".tr,
+          style: const TextStyle(
               fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
         ),
         actions: [
           TextButton(
             onPressed: _submitPost,
-            child: const Text("ĐĂNG",
+            child: Text("post".tr,
                 style: TextStyle(color: Colors.blue, fontSize: 16)),
           ),
         ],
@@ -88,7 +88,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                 ),
                 const SizedBox(width: 10),
                 Text(
-                  userController.currentUser.displayName ?? "Người dùng",
+                  userController.currentUser.displayName ?? "user".tr,
                   style: const TextStyle(
                       fontSize: 16, fontWeight: FontWeight.bold),
                 ),
@@ -99,8 +99,8 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
             child: TextField(
               controller: _postTextController,
               maxLines: null,
-              decoration: const InputDecoration(
-                hintText: "Bạn đang nghĩ gì?",
+              decoration: InputDecoration(
+                hintText: "what_are_you_thinking".tr,
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.all(10),
               ),
@@ -133,7 +133,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
                       child: Container(
                         height: 30,
                         width: 30,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           shape: BoxShape.circle,
                           color: Colors.black54,
                         ),
@@ -157,7 +157,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
               child: ElevatedButton.icon(
                 onPressed: _pickImage,
                 icon: Icon(Icons.photo_library, color: Colors.white, size: 28),
-                label: Text("Thêm ảnh",
+                label: Text("add_photo".tr,
                     style: TextStyle(fontSize: 16, color: Colors.white)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,

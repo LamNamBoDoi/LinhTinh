@@ -19,12 +19,12 @@ class _CommentScreenState extends State<CommentScreen> {
   @override
   void initState() {
     super.initState();
-    _commentController = TextEditingController(); // Khởi tạo 1 lần duy nhất
+    _commentController = TextEditingController();
   }
 
   @override
   void dispose() {
-    _commentController.dispose(); // Giải phóng bộ nhớ khi widget bị huỷ
+    _commentController.dispose();
     super.dispose();
   }
 
@@ -171,13 +171,13 @@ class _CommentScreenState extends State<CommentScreen> {
                     const SizedBox(width: 10),
                     GestureDetector(
                       onTap: () {},
-                      child: const Text("Thích",
+                      child: Text("like".tr,
                           style: TextStyle(color: Colors.blue, fontSize: 12)),
                     ),
                     const SizedBox(width: 10),
                     GestureDetector(
                       onTap: () {},
-                      child: const Text("Trả lời",
+                      child: Text("reply".tr,
                           style: TextStyle(color: Colors.blue, fontSize: 12)),
                     ),
                   ],

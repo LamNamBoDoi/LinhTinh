@@ -18,6 +18,7 @@ class AppConstants {
   static const String UPDATE_USER_MYSELF = '/mita/users/update-myself';
   static const String UPDATE_USER_BY_ID = '/mita/users/update/';
   static const String UPDATE_BLOCK_USER_BY_ID = '/mita/users/lock/';
+  static const String UPDATE_TOKEN_DEVICE = '/mita/users/token-device';
   static const String GET_USERS = '/mita/users/searchByPage';
   static const String GET_IMAGE_BY_NAME = '/mita/public/images/';
   static const String GET_NEW_POSTS = '/mita/posts/get-news';
@@ -26,6 +27,7 @@ class AppConstants {
   static const String COMMENT_POST = '/mita/posts/comments/';
   static const String CREATE_POST = '/mita/posts/create';
   static const String UPLOAD_FILE = '/mita/public/uploadFile';
+  static const String GET_NOTIFY = '/mita/notifications';
 
   // Shared Key
   static const String THEME = 'theme';

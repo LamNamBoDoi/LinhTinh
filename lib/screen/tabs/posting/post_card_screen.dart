@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:timesheet/controller/post_controller.dart';
 import 'package:timesheet/data/model/body/post/post.dart';
 import 'package:timesheet/screen/tabs/posting/comment_screen.dart';
@@ -14,6 +15,7 @@ class PostCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.only(bottom: 20),
+      color: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       elevation: 3,
       child: Padding(
@@ -38,9 +40,14 @@ class PostCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      post.user.displayName ?? "Người dùng",
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      post.user.displayName ?? "user".tr,
+                      style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: Colors.black),
+                    ),
+                    SizedBox(
+                      height: 5,
                     ),
                     Text(
                       DateFormat('dd/MM/yyyy HH:mm').format(
@@ -56,14 +63,9 @@ class PostCard extends StatelessWidget {
             SizedBox(height: 10),
             Text(
               post.content ?? "",
-              style: const TextStyle(fontSize: 16),
+              style: const TextStyle(fontSize: 16, color: Colors.black),
             ),
             const SizedBox(height: 20),
-            // if (post.image != null)
-            //   Image.network(
-            //     post.getLinkImageUrl(post.image!),
-            //     fit: BoxFit.cover,
-            // ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -90,7 +92,7 @@ class PostCard extends StatelessWidget {
                           style: TextStyle(
                               fontSize: 16,
                               color: Colors.black.withOpacity(0.5)),
-                          children: [TextSpan(text: " binh luan")]),
+                          children: [TextSpan(text: " " "comment".tr)]),
                     ],
                   ),
                 ),
@@ -99,7 +101,8 @@ class PostCard extends StatelessWidget {
             const SizedBox(
               height: 10,
             ),
-            const Divider(
+            Divider(
+              color: Theme.of(context).secondaryHeaderColor,
               height: 1,
               thickness: 1,
             ),
@@ -120,7 +123,7 @@ class PostCard extends StatelessWidget {
                           color: Colors.black.withOpacity(0.5),
                         ),
                   label: Text(
-                    "Thích",
+                    "like".tr,
                     style: TextStyle(
                       color: Colors.black.withOpacity(0.5),
                     ),
@@ -153,7 +156,7 @@ class PostCard extends StatelessWidget {
                   },
                   icon: Icon(Icons.comment_outlined, color: Colors.grey[600]),
                   label: Text(
-                    "Bình luận",
+                    "comment".tr,
                     style: TextStyle(
                       color: Colors.black.withOpacity(0.5),
                     ),

@@ -3,9 +3,12 @@ import 'package:get/get.dart';
 import 'package:timesheet/controller/auth_controller.dart';
 import 'package:timesheet/controller/localization_controller.dart';
 import 'package:timesheet/controller/user_controller.dart';
+import 'package:timesheet/screen/sign_in/sign_in_screen.dart';
 import 'package:timesheet/screen/tabs/setting/edit_profile_screen.dart';
+import 'package:timesheet/screen/tabs/setting/notify_screen.dart';
 import 'package:timesheet/theme/theme_controller.dart';
 import 'package:timesheet/utils/app_constants.dart';
+import 'package:timesheet/view/custom_snackbar.dart';
 
 class SettingScreen extends StatelessWidget {
   const SettingScreen({super.key});
@@ -38,7 +41,7 @@ class SettingScreen extends StatelessWidget {
                       style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Colors.blue)),
+                          color: Theme.of(context).textTheme.bodyLarge!.color)),
                 ],
               ),
             ),
@@ -46,38 +49,50 @@ class SettingScreen extends StatelessWidget {
           Expanded(
             child: ListView(
               children: [
+                Divider(
+                  color: Theme.of(context).secondaryHeaderColor,
+                ),
                 GetBuilder<ThemeController>(
                     builder: (controller) => ListTile(
                           leading: const Icon(
                             Icons.dark_mode,
                             color: Colors.blue,
                           ),
-                          title: Text("Chế độ tối màu"),
+                          title: Text("dark_color_mode".tr),
                           trailing: Switch(
                             value: controller.darkTheme!,
                             onChanged: (value) => controller.toggleTheme(),
                           ),
                         )),
-                Divider(),
+                Divider(
+                  color: Theme.of(context).secondaryHeaderColor,
+                ),
                 ListTile(
                   leading: Icon(
                     Icons.notifications,
                     color: Colors.blue,
                   ),
-                  title: Text("Thông báo"),
+                  title: Text("notification".tr),
+                  onTap: () => Get.to(() => NotifyScreen()),
                 ),
-                Divider(),
+                Divider(
+                  color: Theme.of(context).secondaryHeaderColor,
+                ),
                 ListTile(
                   leading: Icon(
                     Icons.person,
                     color: Colors.blue,
                   ),
-                  title: Text("Thông tin cá nhân"),
+                  title: Text("personal_information".tr),
                   onTap: () {
-                    Get.to(() => EditProfileScreen());
+                    Get.to(() => EditProfileScreen(
+                          user: Get.find<UserController>().currentUser,
+                        ));
                   },
                 ),
-                Divider(),
+                Divider(
+                  color: Theme.of(context).secondaryHeaderColor,
+                ),
                 GetBuilder<LocalizationController>(builder: (controller) {
                   String languageName = AppConstants.languages
                       .map((lang) =>
@@ -92,7 +107,7 @@ class SettingScreen extends StatelessWidget {
                       Icons.language,
                       color: Colors.blue,
                     ),
-                    title: Text("Ngôn ngữ"),
+                    title: Text("language".tr),
                     trailing: Text(languageName),
                     onTap: () {
                       Get.bottomSheet(
@@ -101,14 +116,20 @@ class SettingScreen extends StatelessWidget {
                           child: Wrap(
                             children: [
                               ListTile(
-                                title: Text("Tiếng Việt"),
+                                title: Text(
+                                  "Tiếng Việt",
+                                  style: TextStyle(color: Colors.black),
+                                ),
                                 onTap: () {
                                   controller.setLanguage(Locale('vi', 'VN'));
                                   Get.back();
                                 },
                               ),
                               ListTile(
-                                title: Text("English"),
+                                title: Text(
+                                  "English",
+                                  style: TextStyle(color: Colors.black),
+                                ),
                                 onTap: () {
                                   controller.setLanguage(Locale('en', 'US'));
                                   Get.back();
@@ -121,17 +142,32 @@ class SettingScreen extends StatelessWidget {
                     },
                   );
                 }),
-                Divider(),
+                Divider(
+                  color: Theme.of(context).secondaryHeaderColor,
+                ),
                 GetBuilder<AuthController>(builder: (controller) {
                   return ListTile(
                     leading: Icon(
                       Icons.logout,
                       color: Colors.blue,
                     ),
-                    title: Text("Đăng xuất"),
+                    title: Text("sign_out".tr),
+                    onTap: () => controller.logOut().then((response) {
+                      if (response == 200) {
+                        showCustomFlash("Đăng xuất thành công", context,
+                            isError: false);
+                        Get.find<UserController>().resetDataProfile();
+                        Get.offAll(() => SignInScreen());
+                      } else {
+                        showCustomFlash("Đăng xuất thất bại", context,
+                            isError: true);
+                      }
+                    }),
                   );
                 }),
-                Divider(),
+                Divider(
+                  color: Theme.of(context).secondaryHeaderColor,
+                ),
               ],
             ),
           )

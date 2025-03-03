@@ -9,7 +9,6 @@ import 'package:timesheet/data/model/body/users/role.dart';
 import 'package:timesheet/data/model/body/users/user.dart';
 import 'package:timesheet/helper/date_converter.dart';
 import 'package:timesheet/screen/sign_in/sign_in_screen.dart';
-import 'package:timesheet/utils/color_resources.dart';
 import 'package:timesheet/utils/dimensions.dart';
 import 'package:timesheet/utils/images.dart';
 import 'package:timesheet/view/custom_button.dart';
@@ -57,7 +56,7 @@ class SignUpScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                HeaderWidget(),
+                HeaderWidget(context),
                 BodyWidget(context),
               ],
             ),
@@ -74,7 +73,7 @@ class SignUpScreen extends StatelessWidget {
     ));
   }
 
-  Widget HeaderWidget() {
+  Widget HeaderWidget(BuildContext context) {
     return Column(
       children: [
         Container(
@@ -91,6 +90,7 @@ class SignUpScreen extends StatelessWidget {
           child: Text(
             'register'.tr,
             style: TextStyle(
+              color: Theme.of(context).secondaryHeaderColor,
               fontSize: Dimensions.fontSizeOverLarge,
               fontWeight: FontWeight.bold,
             ),
@@ -258,11 +258,12 @@ class SignUpScreen extends StatelessWidget {
                 text: TextSpan(style: TextStyle(fontSize: 14), children: [
                   TextSpan(
                       text: "don't_have_an_account? ".tr,
-                      style: const TextStyle(color: Colors.black)),
+                      style: TextStyle(
+                          color: Theme.of(context).textTheme.bodyLarge!.color)),
                   TextSpan(
                       text: "sign_in".tr,
-                      style: const TextStyle(
-                          color: ColorResources.COLOR_PRIMARY,
+                      style: TextStyle(
+                          color: Theme.of(context).secondaryHeaderColor,
                           fontSize: 15,
                           fontWeight: FontWeight.bold),
                       recognizer: TapGestureRecognizer()
