@@ -1,15 +1,16 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:timesheet/data/model/body/role.dart';
 import 'package:timesheet/data/model/body/token_request.dart';
-import 'package:timesheet/data/model/body/user.dart';
+import 'package:timesheet/data/model/body/users/user.dart';
 
 import '../../utils/app_constants.dart';
 import '../api/api_client.dart';
 
+// quản lý hoạt động liên quan đến xác thực
 class AuthRepo {
   final ApiClient apiClient;
   final SharedPreferences sharedPreferences;
@@ -36,17 +37,20 @@ class AuthRepo {
                 clientId: "core_client",
                 clientSecret: "secret",
                 grantType: "password")
-            .toJson(),_header);
+            .toJson(),
+        _header);
   }
+
+  Future<Response> signup(User user) async =>
+      await apiClient.postData(AppConstants.SIGN_UP, jsonEncode(user), null);
 
   Future<Response> logOut() async {
     return await apiClient.deleteData(AppConstants.LOG_OUT);
   }
 
-  Future<Response> getCurrentUser() async{
+  Future<Response> getCurrentUser() async {
     return await apiClient.getData(AppConstants.GET_USER);
   }
-
 
   Future<String> _saveDeviceToken() async {
     String? _deviceToken = '@';
@@ -69,6 +73,7 @@ class AuthRepo {
     return await sharedPreferences.setString(
         AppConstants.TOKEN, "Bearer $token");
   }
+
   Future<bool> clearUserToken() async {
     return await sharedPreferences.remove(AppConstants.TOKEN);
   }

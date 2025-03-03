@@ -1,3 +1,4 @@
+// lớp đại diện cho phản h
 class ConfigResponse {
   ConfigResponse({
     required this.versionName,

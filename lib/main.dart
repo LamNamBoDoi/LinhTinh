@@ -1,10 +1,15 @@
 import 'dart:io';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
+import 'package:timesheet/firebase_options.dart';
+import 'package:timesheet/helper/notification_helper.dart';
 import 'package:timesheet/theme/dark_theme.dart';
 import 'package:timesheet/theme/light_theme.dart';
 import 'package:timesheet/theme/theme_controller.dart';
@@ -17,12 +22,30 @@ import 'helper/route_helper.dart';
 
 Future<void> main() async {
   if (kDebugMode) {
+    // kiểm tra xem có đang chạy ở chế độ debug ko
     print("Bắt đầu: ${DateTime.now()}");
   }
-  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  WidgetsBinding widgetsBinding =
+      WidgetsFlutterBinding.ensureInitialized(); // khởi tạo
+  // flutter native splach hiển thị màn hình khởi động lần đầu tiên
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
+  // kiểm tra có phải điện thoại di động
   if (ResponsiveHelper.isMobilePhone()) {
     HttpOverrides.global = MyHttpOverrides();
+  }
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  try {
+    if (GetPlatform.isMobile) {
+      await NotificationHelper.requestNotificationPermission(); // Yêu cầu quyền
+      final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+          FlutterLocalNotificationsPlugin();
+      await NotificationHelper.initialize(flutterLocalNotificationsPlugin);
+      FirebaseMessaging.onBackgroundMessage(myBackgroundMessageHandler);
+    }
+  } catch (e) {
+    print('Lỗi khi khởi tạo thông báo: $e');
   }
 
   Map<String, Map<String, String>> _languages = await di.init();
@@ -58,9 +81,11 @@ class MyApp extends StatelessWidget {
           translations: Messages(languages: languages),
           fallbackLocale: Locale(AppConstants.languages[0].languageCode,
               AppConstants.languages[0].countryCode),
-          initialRoute: GetPlatform.isWeb
-              ? RouteHelper.getInitialRoute()
-              : RouteHelper.getSplashRoute(),
+          // initialRoute: GetPlatform.isWeb
+          //     ? RouteHelper.getInitialRoute()
+          //     : RouteHelper.getSplashRoute(),
+          initialRoute: RouteHelper.signIn,
+
           getPages: RouteHelper.routes,
           defaultTransition: Transition.topLevel,
           transitionDuration: const Duration(milliseconds: 250),

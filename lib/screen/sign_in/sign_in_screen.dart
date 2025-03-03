@@ -1,182 +1,164 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:timesheet/controller/auth_controller.dart';
+import 'package:timesheet/controller/user_controller.dart';
+import 'package:timesheet/screen/home/home_screen.dart';
+import 'package:timesheet/screen/sign_up/sign_up_screen.dart';
+import 'package:timesheet/utils/dimensions.dart';
 import 'package:timesheet/utils/images.dart';
+import 'package:timesheet/view/custom_button.dart';
+import 'package:timesheet/view/custom_snackbar.dart';
+import 'package:timesheet/view/custom_text_field.dart';
 
-import '../home/home_screen.dart';
-
-class SignInScreen extends StatefulWidget {
-  const SignInScreen({Key? key}) : super(key: key);
-
-  @override
-  State<SignInScreen> createState() => _SignInScreenState();
-}
-
-class _SignInScreenState extends State<SignInScreen> {
+class SignInScreen extends StatelessWidget {
+  SignInScreen({super.key});
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final _showPass = false.obs;
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-        body: Stack(
-          children: [
-            Scrollbar(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      Container(height: 100,),
-                      GetBuilder<AuthController>(
-                        builder: (controller) => Opacity(
-                          opacity: controller.loading ? 0.3 : 1,
-                          child: Container(
-                            color: Colors.white,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.fromLTRB(100, 56, 100, 60),
-                                  color: Colors.white,
-                                  child: Image.asset(Images.logo),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                                  child: Column(
-                                    children: [
-                                      const Text(
-                                        "Login To Your Account",
-                                        style: TextStyle(
-                                            fontSize: 20,
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      Container(
-                                        margin: const EdgeInsets.only(top: 20),
-                                        child: TextFormField(
-                                          controller: _usernameController,
-                                          textInputAction: TextInputAction.next,
-                                          decoration: InputDecoration(
-                                              contentPadding:
-                                              const EdgeInsets.only(left: 28),
-                                              border: OutlineInputBorder(
-                                                  borderSide: const BorderSide(
-                                                      width: 1,
-                                                      color:
-                                                      Color.fromRGBO(244, 244, 244, 1)),
-                                                  borderRadius: BorderRadius.circular(15)),
-                                              hintText: "Email",
-                                              hintStyle: const TextStyle(
-                                                  color: Colors.grey)),
-                                        ),
-                                      ),
-                                      Container(
-                                          margin: const EdgeInsets.only(top: 20),
-                                          child: Obx(
-                                                () => TextFormField(
-                                                  textInputAction: TextInputAction.done,
-                                                  obscureText: _showPass.value,
-                                                  controller: _passwordController,
-                                                  decoration: InputDecoration(
-                                                  contentPadding:
-                                                  const EdgeInsets.only(left: 28),
-                                                  suffixIcon: IconButton(
-                                                    onPressed: () {
-                                                      _showPass.value = !_showPass.value;
-                                                    },
-                                                    icon: Icon(_showPass.value
-                                                        ? Icons.visibility
-                                                        : Icons.visibility_off),
-                                                  ),
-                                                  border: OutlineInputBorder(
-                                                    borderSide: const BorderSide(
-                                                        width: 1,
-                                                        color: Color.fromRGBO(
-                                                            244, 244, 244, 1)),
-                                                    borderRadius: BorderRadius.circular(15),
-                                                  ),
-                                                  hintText: "Password",
-                                                  hintStyle: const TextStyle(
-                                                      color:
-                                                      Colors.grey)),
-                                            ),
-                                          )),
-                                      Container(
-                                        margin: const EdgeInsets.only(top: 40),
-                                        child: ElevatedButton(
-                                          onPressed: () {
-                                            _login();
-                                          },
-                                          style: TextButton.styleFrom(
-                                            shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(15)),
-                                          ),
-                                          child: Container(
-                                            padding:
-                                            const EdgeInsets.fromLTRB(40, 18, 40, 18),
-                                            child: const Text("Login",
-                                                style: TextStyle(
-                                                    fontSize: 16,
-                                                    color: Color.fromRGBO(
-                                                        191, 252, 226, 1.0))),
-                                          ),
-                                        ),
-                                      )
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                )
+        body: SafeArea(
+      child: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                HeaderWidget(),
+                BodyWidget(context),
+              ],
             ),
-            Center(
-              child: GetBuilder<AuthController>(
-                builder: (controller) {
-                  return Visibility(
-                    visible: controller.loading,
-                    child: const CircularProgressIndicator(),
-                  );
-                },
-              )
-            )
-          ],
-        ));
+          ),
+          Center(
+            child: GetBuilder<AuthController>(
+              builder: (controller) => Visibility(
+                  visible: controller.loading,
+                  child: const CircularProgressIndicator()),
+            ),
+          )
+        ],
+      ),
+    ));
+  }
+
+  Widget HeaderWidget() {
+    return Column(
+      children: [
+        Container(
+          padding: EdgeInsets.all(30),
+          child: Center(
+            child: Image.asset(
+              Images.logonew,
+              height: 120,
+              width: 120,
+            ),
+          ),
+        ),
+        Container(
+          child: Text(
+            'sign_in'.tr,
+            style: TextStyle(
+              fontSize: Dimensions.fontSizeOverLarge,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        SizedBox(
+          height: 20,
+        ),
+      ],
+    );
+  }
+
+  Widget BodyWidget(context) {
+    return GetBuilder<AuthController>(
+        builder: (controller) => Padding(
+              padding: EdgeInsets.all(10),
+              child: Column(
+                children: [
+                  CustomTextField(
+                    controller: _usernameController,
+                    lable: 'username'.tr,
+                    textInputAction: TextInputAction.next,
+                    icon: const Icon(Icons.person),
+                    padding: const EdgeInsets.only(top: 10),
+                  ),
+                  Obx(
+                    () => CustomTextField(
+                        lable: "password".tr,
+                        textInputAction: TextInputAction.done,
+                        controller: _passwordController,
+                        padding: const EdgeInsets.only(top: 10),
+                        isShowPass: _showPass.value,
+                        icon: const Icon(Icons.lock),
+                        lastIcon: Icon(_showPass.value
+                            ? Icons.visibility
+                            : Icons.visibility_off),
+                        onPressedLastIcon: () =>
+                            _showPass.value = !_showPass.value),
+                  ),
+                  CustomButton(
+                    width: double.infinity,
+                    buttonText: "login".tr,
+                    margin: EdgeInsets.only(top: 30),
+                    onPressed: _login,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.all(20),
+                    child: RichText(
+                      text: TextSpan(style: TextStyle(fontSize: 14), children: [
+                        TextSpan(
+                            text: "don't_have_an_account? ".tr,
+                            style: TextStyle(
+                                color: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge!
+                                    .color)),
+                        TextSpan(
+                            text: "sign_up".tr,
+                            style: TextStyle(
+                                color: Theme.of(context).secondaryHeaderColor,
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold),
+                            recognizer: TapGestureRecognizer()
+                              ..onTap = () {
+                                Get.to(SignUpScreen(),
+                                    transition: Transition.rightToLeft,
+                                    duration: Duration(milliseconds: 400),
+                                    curve: Curves.easeIn);
+                              })
+                      ]),
+                    ),
+                  )
+                ],
+              ),
+            ));
   }
 
   _login() {
     String username = _usernameController.text;
     String password = _passwordController.text;
     if (username.isEmpty || password.isEmpty) {
-      const snackBar = SnackBar(
-        content: Text('Bạn cần điền đầy đủ tài khoản mật khẩu.'),
-      );
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      showCustomSnackBar("you_need_enter_your_acount".tr);
     } else {
-      Get.find<AuthController>().login(username, password).then((value) => {
-            if (value == 200)
-              {Get.to(const HomeScreen(),transition: Transition.size,duration: Duration(milliseconds: 500),curve: Curves.easeIn)}
-            else if (value == 400)
-              {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text("Tài khoản mật khẩu không chính xác")))
-              }
-            else
-              {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text("Đã xảy ra lỗi xin vui lòng thử lại")))
-              },
-          });
+      Get.find<AuthController>().login(username, password).then((value) async {
+        if (value == 200) {
+          await Get.find<UserController>().getCurrentUser();
+          showCustomSnackBar("success".tr, isError: false);
+          Get.offAll(HomeScreen(),
+              transition: Transition.cupertinoDialog,
+              duration: Duration(milliseconds: 500),
+              curve: Curves.easeIn);
+        } else if (value == 400) {
+          showCustomSnackBar("account_password_is_incorrect".tr);
+        } else {
+          showCustomSnackBar("please_try_again".tr);
+        }
+        Get.find<UserController>().getCurrentUser();
+      });
     }
   }
 }

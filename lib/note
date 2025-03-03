@@ -1,0 +1,53 @@
+1. controller
+    - Chứa lớp điều khiển
+2. data
+    - Chứa các lớp và mô hình liên quan đến dữ liệu: mô hình đối tượng, dịch vụ gọi api, quản lý dữ liệu
+3. helper
+    - Chứa lớp tiện ích, hàm tái sử dụng cho nhiều nơi
+4. screen
+    - Chứa màn hình
+5. theme
+    - Chứa cấu hình và định nghĩa giao diện
+6. utils
+    - Thường chứa
+7. view
+
+8. widgets
+
+
+
+// Quá trình rest api
+1. Lớp data
+- Định nghĩa cấu trúc dữ liệu cho đối tượng, chứa các thuộc tính và phương thức để chuyển đổi từ json
+2. Lớp api client
+- Thực hiện yêu cầu http đến server, chứa các phương thức gửi yêu cầu và nhận phản hồi
+3. Lớp Repository
+- Cung cấp 1 lớp trung gian giữa api client và controller, tổ chức các phương thức truy cập
+dữ liệu và giảm bớt sự phụ thuộc giữa các Lớp
+4. Lớp Controller 
+- Chịu trách nhiệm sử lý logic, quản lý trạng thái và tương tác với Repository để lấy dữ liệu cho ui
+
+Quá Trình Hoạt Động Chung
+Người dùng thực hiện hành động (ví dụ: đăng nhập):
+
+Người dùng nhập thông tin vào UI (thí dụ, tên đăng nhập và mật khẩu).
+Controller (AuthController):
+
+Khi người dùng nhấn nút đăng nhập, AuthController sẽ gọi phương thức login với tên đăng nhập và mật khẩu.
+Nó sẽ thông báo rằng ứng dụng đang trong trạng thái tải (_loading).
+Repository (AuthRepo):
+
+AuthRepo sẽ gửi yêu cầu đến API bằng cách gọi login trong ApiClient.
+Các thông tin cần thiết (như token, headers) sẽ được chuẩn bị và gửi đi.
+API Client (ApiClient):
+
+ApiClient sẽ thực hiện yêu cầu HTTP đến server.
+Nó xử lý phản hồi từ server và trả về cho AuthRepo.
+Phản hồi từ API:
+
+Nếu đăng nhập thành công, API sẽ trả về token, mà AuthRepo sẽ lưu lại trong SharedPreferences.
+Nếu có lỗi, AuthRepo sẽ kiểm tra và trả về thông báo lỗi.
+Cập nhật UI:
+
+Sau khi nhận phản hồi từ AuthRepo, AuthController sẽ cập nhật trạng thái _loading và _user.
+UI sẽ được cập nhật để hiển thị kết quả cho người dùng (thí dụ, thông báo thành công hoặc lỗi).

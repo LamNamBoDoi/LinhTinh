@@ -5,7 +5,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
-import 'package:timesheet/helper/route_helper.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../utils/app_constants.dart';
 
@@ -21,16 +21,22 @@ class NotificationHelper {
         onDidReceiveNotificationResponse:
             (NotificationResponse notificationResponse) async {
       try {
-
-      } catch (e) {}
+        print(
+            'Notification tapped with payload: ${notificationResponse.payload}');
+        // Xử lý khi người dùng nhấn vào thông báo, ví dụ mở một màn hình chi tiết
+      } catch (e) {
+        print("Error handling notification: $e");
+      }
       return;
     });
-
+    await FirebaseMessaging.instance
+        .setForegroundNotificationPresentationOptions(
+            alert: true, badge: true, sound: true);
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print(
           "onMessage: ${message.notification?.title}/${message.notification?.body}/${message.notification?.titleLocKey}");
       NotificationHelper.showNotification(
-          message, flutterLocalNotificationsPlugin, false);
+          message, flutterLocalNotificationsPlugin, true);
       // if (Get.find<AuthController>().isLoggedIn()) {
       //   Get.find<OrderController>().getRunningOrders(1);
       //   Get.find<OrderController>().getHistoryOrders(1);
@@ -40,10 +46,19 @@ class NotificationHelper {
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       print(
           "onOpenApp: ${message.notification?.title}/${message.notification?.body}/${message.notification?.titleLocKey}");
-      try {
-
-      } catch (e) {}
+      NotificationHelper.showNotification(
+          message, flutterLocalNotificationsPlugin, true);
+      try {} catch (e) {}
     });
+  }
+
+  static Future<void> requestNotificationPermission() async {
+    final status = await Permission.notification.request();
+    if (status.isGranted) {
+      print("Permission granted");
+    } else {
+      print("Permission denied");
+    }
   }
 
   static Future<void> showNotification(RemoteMessage message,
@@ -54,9 +69,9 @@ class NotificationHelper {
       String? orderID;
       String? image;
       if (data) {
-        title = message.data['title'];
-        body = message.data['body'];
-        orderID = message.data['order_id'];
+        title = message.data['title'] ?? "Không có";
+        body = message.data['body'] ?? "Không có";
+        orderID = message.data['order_id'] ?? "Không có";
         image = (message.data['image'] != null &&
                 message.data['image'].isNotEmpty)
             ? message.data['image'].startsWith('http')
@@ -97,6 +112,7 @@ class NotificationHelper {
     }
   }
 
+  // hiển thị thông báo văn bản
   static Future<void> showTextNotification(String title, String body,
       String orderID, FlutterLocalNotificationsPlugin fln) async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
@@ -133,7 +149,13 @@ class NotificationHelper {
     );
     NotificationDetails platformChannelSpecifics =
         NotificationDetails(android: androidPlatformChannelSpecifics);
-    await fln.show(0, title, body, platformChannelSpecifics, payload: orderID);
+    await fln.show(
+      0,
+      title,
+      body,
+      platformChannelSpecifics,
+      payload: orderID,
+    );
   }
 
   static Future<void> showBigPictureNotificationHiddenLargeIcon(
@@ -187,8 +209,8 @@ Future<dynamic> myBackgroundMessageHandler(RemoteMessage message) async {
   var androidInitialize =
       const AndroidInitializationSettings('notification_icon');
   var iOSInitialize = const DarwinInitializationSettings();
-  var initializationsSettings = InitializationSettings(
-      android: androidInitialize, iOS: iOSInitialize);
+  var initializationsSettings =
+      InitializationSettings(android: androidInitialize, iOS: iOSInitialize);
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
   flutterLocalNotificationsPlugin.initialize(initializationsSettings);
