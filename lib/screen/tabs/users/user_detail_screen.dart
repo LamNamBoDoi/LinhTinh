@@ -11,12 +11,12 @@ class UserDetailScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("User"),
+        title: const Text("User"),
         backgroundColor: Theme.of(context).secondaryHeaderColor,
         elevation: 0,
         actions: [
           Container(
-            margin: EdgeInsets.all(8),
+            margin: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: Colors.grey.shade200,
               shape: BoxShape.circle,
@@ -43,7 +43,7 @@ class UserDetailScreen extends StatelessWidget {
               backgroundColor: Colors.grey.shade300,
               backgroundImage: user.image != null
                   ? NetworkImage(user.getLinkImageUrl(user.image!))
-                  : AssetImage("assets/image/avatarDefault.jpg")
+                  : const AssetImage("assets/image/avatarDefault.jpg")
                       as ImageProvider,
             ),
             SizedBox(height: 16),

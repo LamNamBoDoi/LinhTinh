@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timesheet/data/api/api_checker.dart';
 import 'package:timesheet/data/model/body/users/user.dart';
 import 'package:timesheet/data/model/response/token_resposive.dart';
@@ -74,5 +75,10 @@ class AuthController extends GetxController implements GetxService {
   void clearData() {
     _loading = false;
     _user = User();
+  }
+
+  Future<int> getToken() async {
+    Response response = await repo.getToken();
+    return response.statusCode!;
   }
 }

@@ -78,25 +78,21 @@ class CustomTextField extends StatelessWidget {
               prefixIcon: icon,
               contentPadding: contentPadding ?? EdgeInsets.all(10),
               border: OutlineInputBorder(
-                  // tổng
                   borderSide:
                       BorderSide(color: ColorResources.ssColor[4], width: 2),
                   borderRadius: BorderRadius.all(
                       radius ?? radius ?? Radius.circular(30))),
               enabledBorder: OutlineInputBorder(
-                  // khi không select
                   borderSide:
                       BorderSide(color: ColorResources.ssColor[4], width: 1),
                   borderRadius:
                       BorderRadius.all(radius ?? const Radius.circular(30))),
               focusedBorder: OutlineInputBorder(
-                  // khi select
                   borderSide: BorderSide(
                       color: Theme.of(context).primaryColor, width: 2),
                   borderRadius:
                       BorderRadius.all(radius ?? const Radius.circular(30))),
               disabledBorder: OutlineInputBorder(
-                  // khi bị enable = fasle
                   borderSide: const BorderSide(color: Colors.grey, width: 1),
                   borderRadius:
                       BorderRadius.all(radius ?? const Radius.circular(30))),

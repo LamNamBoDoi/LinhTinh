@@ -65,7 +65,7 @@ class CustomButton extends StatelessWidget {
                       textAlign: TextAlign.center,
                       style: robotoBold.copyWith(
                         color:
-                            off! ? Theme.of(context).cardColor : Colors.black,
+                            off! ? Theme.of(context).cardColor : Colors.white,
                         fontSize: fontSize ?? Dimensions.fontSizeLarge,
                       )),
                 ]),

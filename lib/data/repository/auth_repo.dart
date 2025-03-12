@@ -52,6 +52,10 @@ class AuthRepo {
     return await apiClient.getData(AppConstants.GET_USER);
   }
 
+  Future<Response> getToken() async {
+    return await apiClient.getData(AppConstants.GET_TOKEN);
+  }
+
   Future<String> _saveDeviceToken() async {
     String? _deviceToken = '@';
     if (!GetPlatform.isWeb) {

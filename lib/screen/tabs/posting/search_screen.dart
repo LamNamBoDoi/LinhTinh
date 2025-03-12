@@ -78,7 +78,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         : null,
                     child: user.hasPhoto! ? null : Icon(Icons.person),
                   ),
-                  title: Text(user.displayName ?? "Không có tên"),
+                  title: Text(user.displayName ?? "no_name".tr),
                   onTap: () {
                     Get.to(() => PersonalPageScreen(
                           userId: user.id!,

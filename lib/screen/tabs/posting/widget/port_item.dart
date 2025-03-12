@@ -4,12 +4,13 @@ import 'package:timesheet/controller/post_controller.dart';
 import 'package:timesheet/data/model/body/post/post.dart';
 import 'package:timesheet/screen/tabs/posting/comment_screen.dart';
 import 'package:intl/intl.dart';
+import 'package:timesheet/screen/tabs/posting/personal_page_screen.dart';
 
-class PostCard extends StatelessWidget {
+class PostItem extends StatelessWidget {
   final Post post;
   final PostController postController;
 
-  const PostCard({Key? key, required this.post, required this.postController})
+  const PostItem({Key? key, required this.post, required this.postController})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -25,36 +26,46 @@ class PostCard extends StatelessWidget {
           children: [
             Row(
               children: [
-                CircleAvatar(
-                  radius: 25,
-                  backgroundImage: post.user.image != null
-                      ? NetworkImage(post.user.getLinkImageUrl(
-                          post.user.image!)) // Hiển thị ảnh từ URL
-                      : null,
-                  child: post.user.image == null
-                      ? Icon(Icons.person, size: 30)
-                      : null,
-                ),
-                SizedBox(width: 10),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      post.user.displayName ?? "user".tr,
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: Colors.black),
-                    ),
-                    SizedBox(
-                      height: 5,
-                    ),
-                    Text(
-                      DateFormat('dd/MM/yyyy HH:mm').format(
-                          DateTime.fromMillisecondsSinceEpoch(post.date)),
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                    ),
-                  ],
+                GestureDetector(
+                  onTap: () => Get.to(() => PersonalPageScreen(
+                      userId: post.user.id!,
+                      displayName: post.user.displayName!)),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 25,
+                        backgroundImage: post.user.image != null
+                            ? NetworkImage(post.user.getLinkImageUrl(
+                                post.user.image!)) // Hiển thị ảnh từ URL
+                            : null,
+                        child: post.user.image == null
+                            ? Icon(Icons.person, size: 30)
+                            : null,
+                      ),
+                      SizedBox(width: 10),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            post.user.displayName ?? "user".tr,
+                            style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: Colors.black),
+                          ),
+                          SizedBox(
+                            height: 5,
+                          ),
+                          Text(
+                            DateFormat('dd/MM/yyyy HH:mm').format(
+                                DateTime.fromMillisecondsSinceEpoch(post.date)),
+                            style: TextStyle(
+                                fontSize: 12, color: Colors.grey[600]),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
                 const Spacer(),
                 const Icon(Icons.more_horiz, color: Colors.grey),
@@ -88,7 +99,7 @@ class PostCard extends StatelessWidget {
                   text: TextSpan(
                     children: [
                       TextSpan(
-                          text: ' ${post.comments?.length.toString() ?? "0"}',
+                          text: ' ${post.comments.length.toString()}',
                           style: TextStyle(
                               fontSize: 16,
                               color: Colors.black.withOpacity(0.5)),
@@ -111,7 +122,10 @@ class PostCard extends StatelessWidget {
               children: [
                 TextButton.icon(
                   onPressed: () {
-                    postController.likePost(post);
+                    if (!postController.checkLike(post)) {
+                      postController.likePost(post);
+                    }
+                    postController.dislikePost(post);
                   },
                   icon: postController.checkLike(post)
                       ? const Icon(

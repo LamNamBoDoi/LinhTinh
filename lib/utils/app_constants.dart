@@ -24,10 +24,12 @@ class AppConstants {
   static const String GET_NEW_POSTS = '/mita/posts/get-news';
   static const String GET_NEW_POSTS_BY_USER = '/mita/posts/get-news-by-user';
   static const String LIKE_POST = '/mita/posts/likes/';
+  static const String UPDATE_POST = '/mita/posts/update/';
   static const String COMMENT_POST = '/mita/posts/comments/';
   static const String CREATE_POST = '/mita/posts/create';
   static const String UPLOAD_FILE = '/mita/public/uploadFile';
   static const String GET_NOTIFY = '/mita/notifications';
+  static const String GET_TOKEN = '/mita/tokens';
 
   // Shared Key
   static const String THEME = 'theme';
