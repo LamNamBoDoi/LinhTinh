@@ -1,4 +1,3 @@
-import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -9,6 +8,7 @@ import 'package:timesheet/data/model/body/users/role.dart';
 import 'package:timesheet/data/model/body/users/user.dart';
 import 'package:timesheet/helper/date_converter.dart';
 import 'package:timesheet/screen/sign_in/sign_in_screen.dart';
+import 'package:timesheet/screen/tabs/setting/widget/select_gender_widget.dart';
 import 'package:timesheet/utils/dimensions.dart';
 import 'package:timesheet/utils/images.dart';
 import 'package:timesheet/view/custom_button.dart';
@@ -131,7 +131,7 @@ class SignUpScreen extends StatelessWidget {
               padding: EdgeInsets.all(10),
               width: widthScreen,
               lable: "birth_day".tr,
-              enabled: false,
+              enabled: true,
               lastIcon: Icon(Icons.calendar_month),
               onPressedLastIcon: () async {
                 final DateTime? dateTime = await showRoundedDatePicker(
@@ -159,58 +159,7 @@ class SignUpScreen extends StatelessWidget {
               width: widthScreen,
               lable: "birth_place".tr,
             ),
-            Obx(
-              () => Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Container(
-                  padding: EdgeInsets.only(left: 5, right: 5),
-                  decoration: BoxDecoration(
-                    border: Border.all(width: 1, color: Colors.grey),
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                  child: DropdownButton2<String>(
-                    isExpanded: true,
-                    hint: Text('select_your_gender'.tr),
-                    value: _valueGender.value,
-                    iconStyleData: const IconStyleData(
-                      icon: Icon(
-                        Icons.arrow_drop_down,
-                        color: Colors.black45,
-                      ),
-                      iconSize: 36,
-                    ),
-                    underline: SizedBox(),
-                    items: []
-                      ..add(
-                        DropdownMenuItem(
-                          value: "M",
-                          child: Text("male".tr),
-                        ),
-                      )
-                      ..add(
-                        DropdownMenuItem(
-                          value: "N",
-                          child: Text("female".tr),
-                        ),
-                      )
-                      ..add(
-                        DropdownMenuItem(
-                          value: "O",
-                          child: Text("other".tr),
-                        ),
-                      ),
-                    onChanged: (value) {
-                      _valueGender.value = value.toString(); // Cập nhật giá trị
-                    },
-                    dropdownStyleData: DropdownStyleData(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(15),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            SelectGenderWidget(valueGender: _valueGender),
             CustomTextField(
               controller: _emailTextController,
               padding: EdgeInsets.all(10),

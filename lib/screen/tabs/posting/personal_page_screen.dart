@@ -3,22 +3,30 @@ import 'package:get/get.dart';
 import 'package:timesheet/controller/post_controller.dart';
 import 'package:timesheet/controller/user_controller.dart';
 import 'package:timesheet/data/model/body/users/user.dart';
-import 'package:timesheet/screen/tabs/posting/post_card_screen.dart';
+import 'package:timesheet/screen/tabs/posting/widget/port_item.dart';
+import 'package:timesheet/screen/tabs/posting/widget/tab_button_widget.dart';
+import 'package:timesheet/screen/tabs/posting/widget/user_info_widget.dart';
 
 class PersonalPageScreen extends StatefulWidget {
   final int userId;
   final String displayName;
-  const PersonalPageScreen(
-      {super.key, required this.userId, required this.displayName});
+  const PersonalPageScreen({
+    super.key,
+    required this.userId,
+    required this.displayName,
+  });
 
   @override
   State<PersonalPageScreen> createState() => _PersonalPageScreenState();
 }
 
 class _PersonalPageScreenState extends State<PersonalPageScreen> {
-  late User user;
-  UserController userController = Get.find<UserController>();
-  PostController postController = Get.find<PostController>();
+  final UserController userController = Get.find<UserController>();
+  final PostController postController = Get.find<PostController>();
+
+  RxBool selectPost = true.obs; // Trạng thái chọn tab
+  User? user; // Dữ liệu người dùng
+
   @override
   void initState() {
     super.initState();
@@ -29,7 +37,6 @@ class _PersonalPageScreenState extends State<PersonalPageScreen> {
     try {
       user = await userController.getUserById(widget.userId);
       await postController.resetListPost(widget.displayName);
-      print(postController.postsByUser.length);
     } catch (e) {
       debugPrint("Error loading user: $e");
     }
@@ -37,51 +44,91 @@ class _PersonalPageScreenState extends State<PersonalPageScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Scaffold(body: GetBuilder<UserController>(builder: (controller) {
-        if (controller.loading) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).secondaryHeaderColor,
+      ),
+      body: GetBuilder<UserController>(
+        builder: (controller) {
+          if (controller.loading || user == null) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          return Column(
+            children: [
+              const SizedBox(height: 20),
+              CircleAvatar(
+                radius: 50,
+                backgroundImage: user!.image != null
+                    ? NetworkImage(user!.getLinkImageUrl(user!.image!))
+                    : const AssetImage("assets/image/avatarDefault.jpg")
+                        as ImageProvider,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                user!.displayName ?? "username".tr,
+                style:
+                    const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 5),
+              const Divider(height: 5, thickness: 5),
+              Obx(() => _buildTabBar()),
+              const Divider(height: 1, thickness: 1),
+              Expanded(
+                  child: Obx(() => selectPost.value
+                      ? _buildPostList()
+                      : UserInfoWidget(
+                          user: user!,
+                        ))),
+            ],
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildTabBar() {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        children: [
+          TabButtonWidget(
+              title: "articles".tr,
+              isSelected: selectPost.value,
+              onTap: () => selectPost.value = true),
+          TabButtonWidget(
+              title: "info".tr,
+              isSelected: !selectPost.value,
+              onTap: () => selectPost.value = false),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPostList() {
+    return GetBuilder<PostController>(
+      builder: (controller) {
+        if (controller.isLoading) {
           return const Center(child: CircularProgressIndicator());
         }
-        return Column(
-          children: [
-            SizedBox(
-              height: 40,
-            ),
-            CircleAvatar(
-              radius: 50,
-              backgroundImage: user.image != null
-                  ? NetworkImage(user.getLinkImageUrl(user.image!))
-                  : AssetImage("assets/image/avatarDefault.jpg")
-                      as ImageProvider,
-            ),
-            const SizedBox(height: 20), // Để ảnh đại diện không bị che
-            Text(
-              user.displayName ?? "User Name",
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 5),
-
-            Divider(
-              height: 1,
-              thickness: 1,
-            ),
-
-            Expanded(child: GetBuilder<PostController>(builder: (controller) {
-              if (controller.isLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              return ListView.builder(
-                physics: const ClampingScrollPhysics(),
-                itemCount: postController.postsByUser.length,
-                itemBuilder: (context, index) {
-                  final post = postController.postsByUser[index];
-                  return PostCard(post: post, postController: postController);
-                },
-              );
-            })),
-          ],
+        if (postController.postsByUser.isEmpty) {
+          return Center(
+              child: Text("no_posts".tr,
+                  style: TextStyle(fontSize: 16, color: Colors.grey)));
+        }
+        return ListView.builder(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          itemCount: postController.postsByUser.length,
+          itemBuilder: (context, index) {
+            final post = postController.postsByUser[index];
+            return PostItem(post: post, postController: postController);
+          },
         );
-      })),
+      },
     );
   }
 }

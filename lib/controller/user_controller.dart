@@ -18,6 +18,7 @@ class UserController extends GetxController implements GetxService {
 
   List<User> _listUsers = <User>[];
   List<User> _usersPage = <User>[];
+  List<User> _usersPageCurrent = <User>[];
   User _currentUser = User();
   User? _currentUserProfile;
 
@@ -26,6 +27,7 @@ class UserController extends GetxController implements GetxService {
   User? get currentUserProfile => _currentUserProfile;
   List<User> get listUsers => _listUsers;
   List<User> get usersPage => _usersPage;
+  List<User> get usersPageCurrent => _usersPageCurrent;
 
   void resetDataProfile() {
     isAdmin = false;
@@ -34,30 +36,36 @@ class UserController extends GetxController implements GetxService {
   }
 
   Future<void> getCurrentUser() async {
+    _loading = true;
+    update();
     Response response = await repo.getCurrentUser();
-    print(response.body);
+    debugPrint("Get current user: ${response.statusCode}");
+
     if (response.statusCode == 200) {
       _currentUser = User.fromJson(response.body);
       if (_currentUser.username == "admin" &&
           _currentUser.email == "admin@globits.net") isAdmin = true;
-      update();
     } else {
       ApiChecker.checkApi(response);
     }
+    _loading = false;
+    update();
   }
 
-  Future<void> restartListUser() {
+  Future<void> restartListUser() async {
     isLastPage = false;
     currentPage = 1;
-    update();
-    return getListUsersPage();
+    _listUsers.clear();
+    _usersPage.clear();
+    _usersPageCurrent.clear();
+    await getListUsersPage();
   }
 
   Future<void> getListUsersPage() async {
     _loading = true;
     update();
 
-    Response response = await repo.getListUsersPage("", currentPage, 10, 0);
+    Response response = await repo.getListUsersPage("", currentPage, 20, 0);
     debugPrint("List user page: ${response.statusCode}");
 
     if (response.statusCode == 200) {
@@ -66,6 +74,7 @@ class UserController extends GetxController implements GetxService {
         PageableResponse convertPageableResponse =
             PageableResponse.fromJson(responseData);
         _usersPage = convertPageableResponse.content;
+        _usersPageCurrent.addAll(_usersPage);
         Response response = await repo.getListUsersPage(
             "", 1, convertPageableResponse.totalElements, 0);
         debugPrint("List user: ${response.statusCode}");

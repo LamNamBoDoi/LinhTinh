@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:timesheet/controller/post_controller.dart';
-import 'package:timesheet/data/model/body/post/comment.dart';
 import 'package:timesheet/data/model/body/post/post.dart';
-import 'package:intl/intl.dart';
+import 'package:timesheet/screen/tabs/posting/widget/comment_input_widget.dart';
+import 'package:timesheet/screen/tabs/posting/widget/comment_item.dart';
 
 class CommentScreen extends StatefulWidget {
   const CommentScreen({super.key, required this.post});
@@ -52,15 +52,17 @@ class _CommentScreenState extends State<CommentScreen> {
                             return const SizedBox.shrink();
                           }
                           final comment = updatedPost.comments[index];
-                          return _buildCommentCard(comment);
+                          return CommentItem(comment: comment);
                         },
                       ),
                     ),
-                    _buildCommentInput(controller),
+                    CommentInputWidget(
+                      commentController: _commentController,
+                      post: widget.post,
+                      postController: controller,
+                    ),
                   ],
                 ),
-
-                // Hiển thị vòng xoay loading ngay giữa màn hình
                 if (controller.isLoading)
                   Align(
                     alignment: Alignment.center,
@@ -80,112 +82,6 @@ class _CommentScreenState extends State<CommentScreen> {
             );
           },
         ),
-      ),
-    );
-  }
-
-  Widget _buildCommentInput(PostController controller) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-      child: Row(
-        children: [
-          const CircleAvatar(
-            radius: 20,
-            child: Icon(Icons.person, size: 25),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: TextField(
-              controller: _commentController,
-              decoration: InputDecoration(
-                hintText: "Viết bình luận...",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-              ),
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.send, color: Colors.blue),
-            onPressed: () {
-              String commentText = _commentController.text;
-              if (commentText.isNotEmpty) {
-                controller.commentPost(commentText, widget.post);
-                _commentController.clear();
-              }
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCommentCard(Comment? comment) {
-    if (comment == null) return const SizedBox.shrink();
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CircleAvatar(
-            child:
-                comment.user!.hasPhoto! ? null : Icon(Icons.person, size: 20),
-            radius: 20,
-          ),
-          SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  padding: EdgeInsets.all(10),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    borderRadius: BorderRadius.circular(15),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        comment.user!.displayName!,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 14),
-                      ),
-                      const SizedBox(height: 3),
-                      Text(comment.content,
-                          style: const TextStyle(fontSize: 14)),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Row(
-                  children: [
-                    Text(
-                      DateFormat('dd/MM/yyyy HH:mm').format(
-                        DateTime.fromMillisecondsSinceEpoch(comment.date),
-                      ),
-                      style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                    ),
-                    const SizedBox(width: 10),
-                    GestureDetector(
-                      onTap: () {},
-                      child: Text("like".tr,
-                          style: TextStyle(color: Colors.blue, fontSize: 12)),
-                    ),
-                    const SizedBox(width: 10),
-                    GestureDetector(
-                      onTap: () {},
-                      child: Text("reply".tr,
-                          style: TextStyle(color: Colors.blue, fontSize: 12)),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

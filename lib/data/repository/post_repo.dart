@@ -50,6 +50,11 @@ class PostRepo {
         null);
   }
 
+  Future<Response> updatePost(Post post) async {
+    return await apiClient.postData(
+        AppConstants.UPDATE_POST + post.id.toString(), jsonEncode(post), null);
+  }
+
   Future<Response> commentPost(Comment comment, Post post) async {
     return await apiClient.postData(
         AppConstants.COMMENT_POST + post.id.toString(),

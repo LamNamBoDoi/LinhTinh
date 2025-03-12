@@ -2,12 +2,12 @@ import 'package:timesheet/utils/app_constants.dart';
 
 class Media {
   int? id;
-  String contentType;
-  int contentSize;
-  String name;
+  String? contentType;
+  int? contentSize;
+  String? name;
   String? extension;
   bool? isVideo;
-  String filePath;
+  String? filePath;
 
   Media({
     required this.contentSize,

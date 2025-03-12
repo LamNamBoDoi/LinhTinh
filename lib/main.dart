@@ -8,6 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timesheet/controller/auth_controller.dart';
+import 'package:timesheet/controller/user_controller.dart';
 import 'package:timesheet/firebase_options.dart';
 import 'package:timesheet/helper/notification_helper.dart';
 import 'package:timesheet/theme/dark_theme.dart';
@@ -49,13 +52,17 @@ Future<void> main() async {
   }
 
   Map<String, Map<String, String>> _languages = await di.init();
-
-  runApp(MyApp(languages: _languages));
+// Kiểm tra đăng nhập
+  bool isLoggedIn = await checkLoginStatus();
+  String initialRoute = isLoggedIn ? RouteHelper.home : RouteHelper.signIn;
+  runApp(MyApp(languages: _languages, initialRoute: initialRoute));
 }
 
 class MyApp extends StatelessWidget {
   final Map<String, Map<String, String>>? languages;
-  const MyApp({super.key, this.languages});
+  final String initialRoute;
+
+  const MyApp({super.key, this.languages, required this.initialRoute});
 
   @override
   Widget build(BuildContext context) {
@@ -84,7 +91,7 @@ class MyApp extends StatelessWidget {
           // initialRoute: GetPlatform.isWeb
           //     ? RouteHelper.getInitialRoute()
           //     : RouteHelper.getSplashRoute(),
-          initialRoute: RouteHelper.signIn,
+          initialRoute: initialRoute,
 
           getPages: RouteHelper.routes,
           defaultTransition: Transition.topLevel,
@@ -101,5 +108,28 @@ class MyHttpOverrides extends HttpOverrides {
     return super.createHttpClient(context)
       ..badCertificateCallback =
           (X509Certificate cert, String host, int port) => true;
+  }
+}
+
+Future<bool> checkLoginStatus() async {
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  String? token = prefs.getString(AppConstants.TOKEN);
+
+  if (token == null) {
+    return false;
+  }
+
+  try {
+    int response = await Get.find<AuthController>().getToken();
+    await Get.find<UserController>().getCurrentUser();
+
+    if (response == 200) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (e) {
+    print('Lỗi khi kiểm tra đăng nhập: $e');
+    return false;
   }
 }

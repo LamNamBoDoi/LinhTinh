@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:table_calendar/table_calendar.dart';
 import 'package:timesheet/data/model/body/time_sheet.dart';
 import 'package:timesheet/data/repository/timesheet_repo.dart';
 import 'dart:io';
@@ -136,5 +137,20 @@ class TimeSheetController extends GetxController implements GetxService {
     _isLoading = false;
     update();
     return response.statusCode!;
+  }
+
+  void checkTodayAttendenced(TimeSheetController timeSheetController) {
+    DateTime dayCompare =
+        DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
+            .toLocal();
+    if (isSameDay(timeSheetController.selectedDay, DateTime.now())) {
+      if (timeSheetController.events[dayCompare] != null) {
+        timeSheetController.attendanced = true;
+      } else {
+        timeSheetController.attendanced = false;
+      }
+    } else {
+      timeSheetController.attendanced = true;
+    }
   }
 }

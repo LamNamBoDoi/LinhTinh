@@ -15,7 +15,7 @@ class PostController extends GetxController implements GetxService {
   PostController({required this.repo});
 
   int currentPage = 1;
-  bool _isLastPage = false;
+  // bool _isLastPage = false;
   bool _isLoading = false;
   bool get isLoading => _isLoading;
 
@@ -23,18 +23,23 @@ class PostController extends GetxController implements GetxService {
   bool isLastPageByUser = false;
 
   List<Post> _posts = [];
-  List<Post> _postsByUser = [];
+  final List<Post> _postsByUser = [];
   List<Post> _postsCurrent = [];
   List<Post> get posts => _posts;
   List<Post> get postsCurrent => _postsCurrent;
   List<Post> get postsByUser => _postsByUser;
 
   Future<void> resetListPost(String keyWord) async {
-    _isLastPage = false;
+    // _isLastPage = false;
     currentPage = 1;
-    _postsCurrent.clear();
-    _postsByUser.clear();
-    keyWord == "" ? getNewPosts() : getNewPostsByUser(keyWord);
+    if (keyWord == "") {
+      _postsCurrent.clear();
+      _posts.clear();
+      await getNewPosts();
+    } else {
+      _postsByUser.clear();
+      await getNewPostsByUser(keyWord);
+    }
   }
 
   bool checkLike(Post post) {
@@ -106,10 +111,22 @@ class PostController extends GetxController implements GetxService {
     Response response = await repo.likePost(like, post);
     debugPrint("Like: ${response.statusCode}");
     if (response.statusCode == 200) {
-      updatePost(post);
+      updatePagePost(post);
     } else {
       ApiChecker.checkApi(response);
     }
+    _isLoading = false;
+    update();
+  }
+
+  Future<void> dislikePost(Post post) async {
+    _isLoading = true;
+    update();
+    User user = Get.find<UserController>().currentUser;
+    List<Like>? likes = post.likes;
+    likes?.removeWhere((like) => like.user!.id == user.id);
+    post.likes = likes;
+    updatePost(post);
     _isLoading = false;
     update();
   }
@@ -127,7 +144,7 @@ class PostController extends GetxController implements GetxService {
     Response response = await repo.commentPost(comment, post);
     debugPrint("Comment: ${response.statusCode}");
     if (response.statusCode == 200) {
-      updatePost(post);
+      updatePagePost(post);
     } else {
       ApiChecker.checkApi(response);
     }
@@ -135,7 +152,21 @@ class PostController extends GetxController implements GetxService {
     update();
   }
 
-  Future<void> createPost(String content, User user, List<Media> media) async {
+  Future<void> updatePost(Post post) async {
+    _isLoading = true;
+    update();
+    Response response = await repo.updatePost(post);
+    debugPrint("updatePost: ${response.statusCode}");
+    if (response.statusCode == 200) {
+      updatePagePost(post);
+    } else {
+      ApiChecker.checkApi(response);
+    }
+    _isLoading = false;
+    update();
+  }
+
+  Future<void> createPost(String content, User user, List<Media>? media) async {
     _isLoading = true;
     update();
     Post post = Post(
@@ -144,9 +175,8 @@ class PostController extends GetxController implements GetxService {
         id: 0,
         likes: [],
         comments: [],
-        media: media,
+        media: media ?? [],
         user: user);
-    print(post.media.first.name);
     Response response = await repo.createPost(post);
     debugPrint("CreatePost: ${response.statusCode}");
     if (response.statusCode == 200) {
@@ -158,7 +188,7 @@ class PostController extends GetxController implements GetxService {
     update();
   }
 
-  void updatePost(Post post) async {
+  void updatePagePost(Post post) async {
     Response response = await repo.getNewPosts("", currentPage, 5, 0);
     if (response.statusCode == 200) {
       var responseData = response.body;
