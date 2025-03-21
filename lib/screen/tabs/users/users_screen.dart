@@ -15,7 +15,6 @@ class _UsersScreenState extends State<UsersScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   late UserController userController;
-  List<User> filteredUsers = [];
   bool isLoadingMore = false;
 
   @override
@@ -37,21 +36,8 @@ class _UsersScreenState extends State<UsersScreen> {
   Future<void> _loadMoreUsers() async {
     setState(() => isLoadingMore = true);
     userController.currentPage += 1;
-    await userController.getListUsersPage();
+    await userController.getListUsersPage(isUpdate: false);
     setState(() => isLoadingMore = false);
-  }
-
-  void _searchUsers(String query) {
-    if (query.isEmpty) {
-      setState(() => filteredUsers = []);
-      return;
-    }
-    setState(() => filteredUsers = userController.listUsers
-        .where((user) =>
-            user.displayName?.toLowerCase().contains(query.toLowerCase()) ??
-            false)
-        .take(10)
-        .toList());
   }
 
   @override
@@ -66,8 +52,8 @@ class _UsersScreenState extends State<UsersScreen> {
       resizeToAvoidBottomInset: false,
       body: GetBuilder<UserController>(
         builder: (controller) {
-          final List<User> displayUsers = filteredUsers.isNotEmpty
-              ? filteredUsers
+          final List<User> displayUsers = controller.listFilteredUser.isNotEmpty
+              ? controller.listFilteredUser
               : controller.usersPageCurrent;
           return Stack(
             children: [
@@ -76,7 +62,7 @@ class _UsersScreenState extends State<UsersScreen> {
                   _buildSearchBar(),
                   Expanded(
                     child: displayUsers.isEmpty
-                        ? Center(child: Text("no_users_found".tr))
+                        ? SizedBox()
                         : ListView.builder(
                             physics: const ClampingScrollPhysics(),
                             controller: _scrollController,
@@ -104,6 +90,7 @@ class _UsersScreenState extends State<UsersScreen> {
     return Padding(
       padding: const EdgeInsets.all(10),
       child: TextField(
+        style: TextStyle(color: Colors.black),
         controller: _searchController,
         decoration: InputDecoration(
           hintText: "search...".tr,
@@ -114,7 +101,7 @@ class _UsersScreenState extends State<UsersScreen> {
           filled: true,
           fillColor: Colors.white,
         ),
-        onChanged: _searchUsers,
+        onChanged: (query) => Get.find<UserController>().searchUsers(query),
       ),
     );
   }

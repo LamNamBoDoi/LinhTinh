@@ -5,7 +5,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:timesheet/data/api/api_checker.dart';
 import 'package:timesheet/data/model/body/photo.dart';
 import 'package:timesheet/data/repository/photo_repo.dart';
-import 'package:timesheet/view/custom_snackbar.dart';
 
 class PhotoController extends GetxController implements GetxService {
   final PhotoRepo repo;
@@ -16,12 +15,12 @@ class PhotoController extends GetxController implements GetxService {
   Photo? _photo;
 
   Photo? get photo => _photo;
+
   Future<void> pickImage(ImageSource source) async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: source);
     if (image != null) {
       selectedPhoto = File(image.path);
-      print(selectedPhoto);
       update();
     }
   }
@@ -43,8 +42,8 @@ class PhotoController extends GetxController implements GetxService {
 
     if (selectedPhoto == null ||
         selectedPhoto!.lengthSync() / 1024 / 1024 > 1) {
-      showCustomSnackBar("please_select_another_photo".trParams(),
-          isError: true);
+      // showCustomSnackBar("please_select_another_photo".trParams(),
+      // isError: true);
       return 400;
     }
     print(

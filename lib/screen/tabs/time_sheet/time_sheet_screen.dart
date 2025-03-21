@@ -20,10 +20,7 @@ class TimeSheetScreen extends StatelessWidget {
       body: GetBuilder<TimeSheetController>(
         initState: (state) async {
           WidgetsBinding.instance.addPostFrameCallback((_) async {
-            await Get.find<TimeSheetController>().init().then((value) {
-              Get.find<TimeSheetController>()
-                  .checkTodayAttendenced(Get.find<TimeSheetController>());
-            });
+            await Get.find<TimeSheetController>().init();
             await Get.find<TrackingController>()
                 .getTrackingDate(DateTime.now());
           });
@@ -65,16 +62,9 @@ class TimeSheetScreen extends StatelessWidget {
                   )
                 ],
               ),
-              // if (timeSheetController.isLoading)
-              //   Positioned.fill(
-              //     child: Container(
-              //       color: Colors.black
-              //           .withOpacity(0.5), // Add a background overlay
-              //       child: Center(
-              //         child: CircularProgressIndicator(),
-              //       ),
-              //     ),
-              //   ),
+              if (timeSheetController.isLoading)
+                const Center(
+                    child: CircularProgressIndicator(color: Colors.blueAccent)),
             ],
           );
         },
@@ -82,8 +72,8 @@ class TimeSheetScreen extends StatelessWidget {
     );
   }
 
-  void handleCheckin(TimeSheetController timeSheetController) {
-    timeSheetController.checkIn().then((value) {
+  void handleCheckin(TimeSheetController timeSheetController) async {
+    await timeSheetController.checkIn().then((value) {
       if (value == 200 || value == 201) {
         showCustomSnackBar("success".tr, isError: false);
       } else {

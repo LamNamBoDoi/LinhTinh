@@ -34,7 +34,7 @@ class _PostingScreenState extends State<PostingScreen> {
   Future<void> _loadMorePosts() async {
     setState(() => isLoadingMore = true);
     postController.currentPage += 1;
-    await postController.getNewPosts();
+    await postController.getNewPosts(isUpdate: false);
     setState(() => isLoadingMore = false);
   }
 

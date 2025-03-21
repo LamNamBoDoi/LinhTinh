@@ -14,14 +14,14 @@ import 'package:timesheet/view/custom_snackbar.dart';
 import 'package:timesheet/view/custom_text_field.dart';
 
 class EditProfileScreen extends StatefulWidget {
-  EditProfileScreen({super.key, required this.user});
-
+  EditProfileScreen({super.key, required this.isMyProfile});
+  final bool isMyProfile;
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
-  final User user;
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
+  late User user;
   final TextEditingController _displayNameTextController =
       TextEditingController();
   final TextEditingController _dateBirthDayTextController =
@@ -34,210 +34,262 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       TextEditingController();
   final TextEditingController _yearTextController = TextEditingController();
   final _valueGender = Rx<String?>("");
-
+  final _formKey = GlobalKey<FormState>();
   DateTime? _timeBirthday = null;
   RxBool _activeUser = true.obs;
+  RxBool _validateGender = true.obs;
   @override
   void initState() {
     super.initState();
     PhotoController photoController = Get.find<PhotoController>();
+    user = widget.isMyProfile
+        ? Get.find<UserController>().currentUser
+        : Get.find<UserController>().selectedUser;
     photoController.selectedPhoto = null;
-    _activeUser = RxBool(widget.user.active ?? true);
-    _displayNameTextController.text = widget.user.displayName ?? "";
-    _dateBirthDayTextController.text = widget.user.dob ?? "";
-    _birthPlaceTextController.text = widget.user.birthPlace ?? "";
-    _emailTextController.text = widget.user.email ?? "";
-    _usernameTextController.text = widget.user.username ?? "";
-    _universityTextController.text = widget.user.university ?? "";
-    _yearTextController.text = widget.user.year.toString() ?? "";
-    _valueGender.value = widget.user.gender;
+    _activeUser = RxBool(user.active ?? true);
+    _displayNameTextController.text = user.displayName ?? "";
+    _dateBirthDayTextController.text = user.dob ?? "";
+    _birthPlaceTextController.text = user.birthPlace ?? "";
+    _emailTextController.text = user.email ?? "";
+    _usernameTextController.text = user.username ?? "";
+    _universityTextController.text = user.university ?? "";
+    _yearTextController.text = user.year.toString() ?? "";
+    _valueGender.value = user.gender;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("edit_profile".tr),
-        backgroundColor: Theme.of(context).secondaryHeaderColor,
-      ),
-      body: Stack(
-        children: [
-          SingleChildScrollView(
-            padding: EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                ChangeAvatarWidget(user: widget.user),
-                SizedBox(height: 20),
-                Obx(
-                  () => SwitchListTile(
-                    title: Text("account_status".tr,
-                        style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color:
-                                Theme.of(context).textTheme.bodyLarge!.color)),
-                    value: _activeUser.value,
-                    onChanged: (value) {
-                      if (_activeUser.value == true)
-                        showCustomConfirm(context, "change_account_status".tr,
-                            () {
-                          _activeUser.value = value;
-                          Get.find<UserController>()
-                              .blockUser(widget.user.id!)
-                              .then((response) async {
-                            if (response == 200) {
-                              showCustomSnackBar("success".tr, isError: false);
-                            } else {
-                              showCustomSnackBar("fail".tr, isError: true);
-                            }
-                            Navigator.pop(context);
-                            await Get.find<UserController>().getListUsersPage();
-                          });
-                        });
-                    },
+        appBar: AppBar(
+          title: Text("edit_profile".tr),
+          backgroundColor: Theme.of(context).secondaryHeaderColor,
+        ),
+        body: GetBuilder<UserController>(
+          builder: (controller) => Stack(
+            children: [
+              SingleChildScrollView(
+                padding: EdgeInsets.all(20.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      ChangeAvatarWidget(isMyProfile: widget.isMyProfile),
+                      SizedBox(height: 20),
+                      Obx(
+                        () => SwitchListTile(
+                            title: Text("account_status".tr,
+                                style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context)
+                                        .textTheme
+                                        .bodyLarge!
+                                        .color)),
+                            value: _activeUser.value,
+                            onChanged: (value) => _blockUser(value)),
+                      ),
+                      CustomTextField(
+                        controller: _displayNameTextController,
+                        lable: 'last_name'.tr,
+                        validator: (value) =>
+                            value!.isEmpty ? 'please_enter_last_name'.tr : null,
+                      ),
+                      CustomTextField(
+                        controller: _dateBirthDayTextController,
+                        lable: "birth_day".tr,
+                        enabled: true,
+                        // validator: (value) =>
+                        //     value!.isEmpty ? 'please_enter_birth_day'.tr : null,
+                        lastIcon: Icon(Icons.calendar_month),
+                        onPressedLastIcon: () async {
+                          final DateTime? dateTime =
+                              await showRoundedDatePicker(
+                            context: context,
+                            fontFamily: 'NotoSerif',
+                            firstDate: DateTime(1950),
+                            lastDate: DateTime(2026),
+                            locale: Locale('en', 'US'),
+                            borderRadius: 16,
+                            height: 250,
+                            imageHeader: AssetImage(Images.bgDate),
+                            styleDatePicker: MaterialRoundedDatePickerStyle(
+                              textStyleDayHeader:
+                                  TextStyle(color: Colors.amber),
+                            ),
+                            initialDate: DateTime.now(),
+                          );
+                          _dateBirthDayTextController.text =
+                              DateConverter.dateTimeStringToDateOnly(
+                                  dateTime.toString());
+                          _timeBirthday = dateTime;
+                        },
+                      ),
+                      CustomTextField(
+                        controller: _birthPlaceTextController,
+                        lable: "birth_place".tr,
+                        // validator: (value) => value!.isEmpty
+                        //     ? 'please_enter_birth_place'.tr
+                        //     : null,
+                      ),
+                      SelectGenderWidget(
+                        valueGender: _valueGender,
+                        validateGender: _validateGender,
+                      ),
+                      CustomTextField(
+                        controller: _emailTextController,
+                        lable: "email".tr,
+                        validator: (value) =>
+                            value!.isEmpty ? 'please_enter_email'.tr : null,
+                      ),
+                      CustomTextField(
+                        controller: _usernameTextController,
+                        lable: "username".tr,
+                        validator: (value) =>
+                            value!.isEmpty ? 'please_enter_username'.tr : null,
+                      ),
+                      CustomTextField(
+                        controller: _universityTextController,
+                        lable: "university".tr,
+                        validator: (value) => value!.isEmpty
+                            ? 'please_enter_university'.tr
+                            : null,
+                      ),
+                      CustomTextField(
+                        controller: _yearTextController,
+                        lable: "school_year".tr,
+                        validator: (value) => value!.isEmpty
+                            ? 'Please enter school year'.tr
+                            : null,
+                      ),
+                      CustomButton(
+                        width: double.infinity,
+                        buttonText: "update".tr,
+                        onPressed: () {
+                          controller.userUpdate = user;
+                          if (controller.loading == false)
+                            _updateProfile(controller.userUpdate);
+                        },
+                      ),
+                    ],
                   ),
                 ),
-                CustomTextField(
-                  controller: _displayNameTextController,
-                  padding: EdgeInsets.all(10),
-                  lable: 'last_name'.tr,
+              ),
+              if (controller.loading == true)
+                const Center(
+                  child: CircularProgressIndicator(
+                    color: Colors.blue,
+                  ),
                 ),
-                CustomTextField(
-                  controller: _dateBirthDayTextController,
-                  padding: EdgeInsets.all(10),
-                  lable: "birth_day".tr,
-                  enabled: true,
-                  lastIcon: Icon(Icons.calendar_month),
-                  onPressedLastIcon: () async {
-                    final DateTime? dateTime = await showRoundedDatePicker(
-                      context: context,
-                      fontFamily: 'NotoSerif',
-                      firstDate: DateTime(1950),
-                      lastDate: DateTime(2026),
-                      locale: Locale('en', 'US'),
-                      borderRadius: 16,
-                      height: 250,
-                      imageHeader: AssetImage(Images.bgDate),
-                      styleDatePicker: MaterialRoundedDatePickerStyle(
-                        textStyleDayHeader: TextStyle(color: Colors.amber),
-                      ),
-                      initialDate: DateTime.now(),
-                    );
-                    _dateBirthDayTextController.text =
-                        DateConverter.dateTimeStringToDateOnly(
-                            dateTime.toString());
-                    _timeBirthday = dateTime;
-                  },
-                ),
-                CustomTextField(
-                  controller: _birthPlaceTextController,
-                  padding: EdgeInsets.all(10),
-                  lable: "birth_place".tr,
-                ),
-                SelectGenderWidget(valueGender: _valueGender),
-                CustomTextField(
-                  controller: _emailTextController,
-                  padding: EdgeInsets.all(10),
-                  lable: "email".tr,
-                ),
-                CustomTextField(
-                  controller: _usernameTextController,
-                  padding: EdgeInsets.all(10),
-                  lable: "username".tr,
-                ),
-                CustomTextField(
-                  controller: _universityTextController,
-                  padding: EdgeInsets.all(10),
-                  lable: "University".tr,
-                ),
-                CustomTextField(
-                  controller: _yearTextController,
-                  padding: EdgeInsets.all(10),
-                  lable: "Year".tr,
-                ),
-                CustomButton(
-                  width: double.infinity,
-                  buttonText: "update".tr,
-                  margin: const EdgeInsets.all(10),
-                  onPressed: _updateProfile,
-                ),
-              ],
-            ),
+            ],
           ),
-          if (Get.find<UserController>().loading == true)
-            const Center(
-              child: CircularProgressIndicator(),
-            ),
-        ],
-      ),
-    );
+        ));
   }
 
-  void _updateProfile() async {
+  void _updateProfile(User updateUser) async {
+    FocusScope.of(context).unfocus();
     UserController userController = Get.find<UserController>();
     PhotoController photoController = Get.find<PhotoController>();
     String? deviceToken = await FirebaseMessaging.instance.getToken();
     String? dateBirthDay =
         _timeBirthday != null ? _timeBirthday!.toIso8601String() + "Z" : null;
-    if (_displayNameTextController.text.isEmpty ||
-        _birthPlaceTextController.text.isEmpty ||
-        _emailTextController.text.isEmpty ||
-        _usernameTextController.text.isEmpty ||
-        _universityTextController.text.isEmpty ||
-        _yearTextController.text.isEmpty) {
-      showCustomFlash("please_fill_in_completely".tr, context, isError: true);
+    final genderValue = _valueGender.value;
+
+    if (!_formKey.currentState!.validate() ||
+        genderValue == null ||
+        genderValue.isEmpty) {
+      if (genderValue == null || genderValue.isEmpty) {
+        _validateGender.value = false;
+      }
+      showCustomSnackBar('cannot_left_blank'.tr);
       return;
     }
     int response = 0;
     if (photoController.selectedPhoto != null) {
-      response = await photoController.uploadImageUrl();
+      response = await photoController.uploadImageUrl().then((response) {
+        if (response != 200) {
+          Get.snackbar("error".tr, "please_select_another_photo".tr,
+              backgroundColor: Colors.red, colorText: Colors.white);
+        }
+        return response;
+      });
     }
     if (response == 200 || response == 0) {
       User user = User(
-          id: widget.user.id,
+          id: updateUser.id,
           displayName: _displayNameTextController.text,
           birthPlace: _birthPlaceTextController.text,
           email: _emailTextController.text,
           username: _usernameTextController.text,
           gender: _valueGender.value,
-          image: photoController.photo?.name ?? widget.user.image,
+          image: photoController.photo?.name ?? userController.image,
           hasPhoto: true,
-          password: widget.user.password,
-          confirmPassword: widget.user.password,
+          password: updateUser.password,
+          confirmPassword: updateUser.password,
           active: true,
           dob: dateBirthDay,
           changePass: null,
           tokenDevice: deviceToken,
-          roles: widget.user.roles,
+          roles: updateUser.roles,
           year: _yearTextController.text.isNotEmpty
               ? int.parse(_yearTextController.text)
-              : widget.user.year,
+              : updateUser.year,
           university: _universityTextController.text);
-      if (widget.user.tokenDevice != deviceToken) {
+      if (user.tokenDevice != deviceToken) {
         userController.updateTokenDevice(deviceToken!);
       }
-      userController.isAdmin == false
-          ? await userController.updateUserMySelf(user).then((response) async {
-              if (response == 200) {
-                showCustomFlash("success".tr, context, isError: false);
-                await Get.find<UserController>()
-                    .getCurrentUser()
-                    .then((response) {
-                  Get.back();
-                });
-              } else {
-                showCustomFlash("fail".tr, context);
-              }
-            })
-          : userController.updateUserById(user).then((response) {
-              if (response == 200) {
-                showCustomFlash("success".tr, context, isError: false);
-              } else {
-                showCustomFlash("fail".tr, context);
-              }
-              Get.back();
-            });
+      if (widget.isMyProfile) {
+        if (userController.currentUser.isEqual(user)) {
+          showCustomFlash("nothing_changed".tr, context, isError: true);
+        } else {
+          await userController.updateUserMySelf(user).then((response) async {
+            if (response == 200) {
+              showCustomFlash("success".tr, context, isError: false);
+              await Get.find<UserController>().getCurrentUser();
+            } else {
+              showCustomFlash("fail".tr, context);
+            }
+          });
+        }
+      } else if (userController.isAdmin == true) {
+        if (userController.currentUser.isEqual(user)) {
+          showCustomFlash("nothing_changed".tr, context, isError: true);
+        } else {
+          await userController.updateUserById(user).then((response) async {
+            if (response == 200) {
+              _validateGender.value = true;
+              showCustomFlash("success".tr, context, isError: false);
+            } else {
+              showCustomFlash("fail".tr, context);
+            }
+          });
+        }
+      }
+    }
+  }
+
+  void _blockUser(bool value) {
+    if (_activeUser.value == true) {
+      if (widget.isMyProfile) {
+        if (Get.find<UserController>().currentUser.username != "admin1") {
+          showCustomConfirm(context, "change_account_status".tr, () {
+            _activeUser.value = value;
+            Get.find<UserController>().blockUser(user.id!).then(
+                (_) async => await Get.find<UserController>().getListUsers());
+            Navigator.pop(context);
+          });
+        }
+      } else {
+        if (Get.find<UserController>().currentUser.username == "admin1" &&
+            Get.find<UserController>().selectedUser.username != "admin1") {
+          showCustomConfirm(context, "change_account_status".tr, () {
+            _activeUser.value = value;
+            Get.find<UserController>().blockUser(user.id!).then(
+                (_) async => await Get.find<UserController>().getListUsers());
+            Navigator.pop(context);
+          });
+        }
+      }
     }
   }
 }

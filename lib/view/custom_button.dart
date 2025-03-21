@@ -31,7 +31,7 @@ class CustomButton extends StatelessWidget {
       backgroundColor: onPressed == null
           ? Theme.of(context).disabledColor
           : off!
-              ? Colors.grey.withOpacity(0.5)
+              ? Colors.grey
               : Theme.of(context).secondaryHeaderColor,
       minimumSize: Size(width != null ? width! : Dimensions.WEB_MAX_WIDTH,
           height != null ? height! : 50),

@@ -6,7 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:timesheet/controller/photo_controller.dart';
 import 'package:timesheet/controller/post_controller.dart';
 import 'package:timesheet/controller/user_controller.dart';
-import 'package:timesheet/data/model/body/post/media.dart';
+import 'package:timesheet/view/custom_snackbar.dart';
 
 class CreatePostScreen extends StatefulWidget {
   @override
@@ -27,70 +27,104 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
 
   void _submitPost() async {
     String content = _postTextController.text.trim();
-
+    bool isUploadSuccessful = true;
     if (content.isEmpty) {
-      Get.snackbar("error".tr, "please_enter_content!".tr,
-          backgroundColor: Colors.red, colorText: Colors.white);
+      showCustomFlash("please_enter_content!".tr, context, isError: true);
       return;
     }
     if (photoController.selectedPhoto != null) {
-      await photoController.uploadImageUrl();
+      await photoController.uploadImageUrl().then((response) {
+        if (response != 200) {
+          showCustomFlash("please_select_another_photo".tr, context,
+              isError: true);
+          isUploadSuccessful = false;
+        }
+      });
     }
-    final photo = photoController.photo;
-    if (photo != null) {
-      final media = [
-        Media(
-          contentSize: photo.contentSize,
-          contentType: photo.contentType,
-          extension: photo.extension,
-          id: null,
-          isVideo: photo.isVideo,
-          name: photo.name,
-          filePath: photo.filePath,
-        )
-      ];
-      // postController.createPost(content, userController.currentUser, media);
-      print("Media: " + media.toString());
-    } else {
-      postController.createPost(content, userController.currentUser, []);
+    if (isUploadSuccessful) {
+      if (photoController.photo != null &&
+          photoController.selectedPhoto != null) {
+        // final media = [
+        //   Media(
+        //     contentSize: photo.contentSize,
+        //     contentType: photo.contentType,
+        //     extension: photo.extension,
+        //     id: null,
+        //     isVideo: photo.isVideo,
+        //     name: photo.name,
+        //     filePath: photo.filePath,
+        //   )
+        // ];
+        // postController.createPost(content, userController.currentUser, media);
+        showCustomSnackBar("Chưa đăng post với ảnh được, hãy xóa ảnh đi");
+      } else {
+        postController.createPost(content, userController.currentUser, []);
+        Get.back();
+      }
     }
-
-    Get.back();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0.5,
-        leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.black),
-          onPressed: () => Get.back(),
-        ),
-        title: Text("create_articles".tr,
-            style: const TextStyle(
+        resizeToAvoidBottomInset: false,
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).secondaryHeaderColor,
+          elevation: 0.5,
+          title: Text("create_articles".tr,
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.black)),
-        actions: [
-          TextButton(
-            onPressed: _submitPost,
-            child: Text("post".tr,
-                style: TextStyle(color: Colors.blue, fontSize: 16)),
+              )),
+          centerTitle: true,
+          actions: [
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: GestureDetector(
+                onTap: _submitPost,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(
+                      color: Colors.blue,
+                      width: 2,
+                    ),
+                  ),
+                  child: Center(
+                    child: Text(
+                      "post".tr,
+                      style: const TextStyle(
+                        color: Colors.blue, // Màu chữ
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            )
+          ],
+        ),
+        body: GetBuilder<PhotoController>(
+          builder: (_) => Stack(
+            children: [
+              Column(
+                children: [
+                  _buildUserInfo(),
+                  _buildPostInput(),
+                  _buildSelectedImage(),
+                  _buildAddPhotoButton(),
+                ],
+              ),
+              if (photoController.isLoading)
+                const Center(
+                  child: CircularProgressIndicator(),
+                ),
+            ],
           ),
-        ],
-      ),
-      body: Column(
-        children: [
-          _buildUserInfo(),
-          _buildPostInput(),
-          _buildSelectedImage(),
-          _buildAddPhotoButton(),
-        ],
-      ),
-    );
+        ));
   }
 
   Widget _buildUserInfo() {
@@ -100,10 +134,11 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
         children: [
           CircleAvatar(
             radius: 25,
-            backgroundImage: userController.currentUser.image != null
+            backgroundImage: (userController.currentUser.image != "" &&
+                    userController.currentUser.image != null)
                 ? NetworkImage(userController.currentUser
                     .getLinkImageUrl(userController.currentUser.image!))
-                : null,
+                : AssetImage("assets/image/avatarDefault.jpg") as ImageProvider,
             child: userController.currentUser.image == null
                 ? const Icon(Icons.person, size: 30)
                 : null,

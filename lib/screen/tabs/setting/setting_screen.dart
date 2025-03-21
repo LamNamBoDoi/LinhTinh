@@ -11,16 +11,21 @@ import 'package:timesheet/theme/theme_controller.dart';
 import 'package:timesheet/utils/app_constants.dart';
 import 'package:timesheet/view/custom_snackbar.dart';
 
-class SettingScreen extends StatelessWidget {
+class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
 
+  @override
+  State<SettingScreen> createState() => _SettingScreenState();
+}
+
+class _SettingScreenState extends State<SettingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
           centerTitle: true,
-          title: const Text(
-            "Setting",
+          title: Text(
+            "settings".tr,
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           backgroundColor: Theme.of(context).secondaryHeaderColor,
@@ -71,14 +76,16 @@ class SettingScreen extends StatelessWidget {
                                         );
                                       case 2:
                                         return SettingItem(
-                                          icon: Icons.person,
-                                          title: "personal_information".tr,
-                                          onTap: () => Get.to(() =>
-                                              EditProfileScreen(
-                                                  user:
-                                                      Get.find<UserController>()
-                                                          .currentUser)),
-                                        );
+                                            icon: Icons.person,
+                                            title: "personal_information".tr,
+                                            onTap: () {
+                                              userController.image =
+                                                  userController
+                                                      .currentUser.image!;
+                                              Get.to(() => EditProfileScreen(
+                                                    isMyProfile: true,
+                                                  ));
+                                            });
                                       case 3:
                                         String languageName = AppConstants
                                             .languages
@@ -140,7 +147,8 @@ class SettingScreen extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 50,
-              backgroundImage: controller.currentUser.image != null
+              backgroundImage: (controller.currentUser.image != "" &&
+                      controller.currentUser.image != null)
                   ? NetworkImage(controller.currentUser
                       .getLinkImageUrl(controller.currentUser.image!))
                   : const AssetImage("assets/image/avatarDefault.jpg")

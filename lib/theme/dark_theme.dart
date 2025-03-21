@@ -9,6 +9,7 @@ ThemeData dark({Color color = const Color(0xFF54b46b)}) => ThemeData(
       brightness: Brightness.dark,
       hintColor: const Color(0xFFbebebe),
       cardColor: Colors.black,
+      iconTheme: IconThemeData(color: Colors.white),
       textTheme: TextTheme(
         bodyLarge: TextStyle(color: Colors.white), // Dùng cho nội dung chính
         bodyMedium: TextStyle(color: Colors.white54),

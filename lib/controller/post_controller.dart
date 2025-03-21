@@ -35,7 +35,7 @@ class PostController extends GetxController implements GetxService {
     if (keyWord == "") {
       _postsCurrent.clear();
       _posts.clear();
-      await getNewPosts();
+      await getNewPosts(isUpdate: false);
     } else {
       _postsByUser.clear();
       await getNewPostsByUser(keyWord);
@@ -50,18 +50,25 @@ class PostController extends GetxController implements GetxService {
         false;
   }
 
-  Future<void> getNewPosts() async {
+  Future<void> getNewPosts({required bool isUpdate}) async {
     _isLoading = true;
     update();
 
-    Response response = await repo.getNewPosts("", currentPage, 5, 0);
-    debugPrint("okeoke: ${response.statusCode}");
+    Response response = isUpdate
+        ? await repo.getNewPosts("", 1, 5 * currentPage, 0)
+        : await repo.getNewPosts("", currentPage, 5, 0);
+    debugPrint("getNewPosts: ${response.statusCode}");
     if (response.statusCode == 200) {
       var responseData = response.body;
       if (responseData is Map<String, dynamic>) {
         PostResponse convertPostResponse = PostResponse.fromJson(responseData);
         _posts = convertPostResponse.content;
-        _postsCurrent.addAll(_posts);
+        _posts = convertPostResponse.content;
+        if (isUpdate) {
+          _postsCurrent.replaceRange(0, _postsCurrent.length, _posts);
+        } else {
+          _postsCurrent.addAll(_posts);
+        }
       } else {
         throw Exception("Unexpected response format");
       }
@@ -102,8 +109,7 @@ class PostController extends GetxController implements GetxService {
 
     Like like = Like(
       id: 0,
-      date: DateTime.now()
-          .millisecondsSinceEpoch, // Chuyển đổi thời gian hiện tại thành int (milliseconds since epoch)
+      date: DateTime.now().millisecondsSinceEpoch,
       type: 0,
       user: userController.currentUser,
     );
@@ -111,7 +117,7 @@ class PostController extends GetxController implements GetxService {
     Response response = await repo.likePost(like, post);
     debugPrint("Like: ${response.statusCode}");
     if (response.statusCode == 200) {
-      updatePagePost(post);
+      getNewPosts(isUpdate: true);
     } else {
       ApiChecker.checkApi(response);
     }
@@ -144,7 +150,7 @@ class PostController extends GetxController implements GetxService {
     Response response = await repo.commentPost(comment, post);
     debugPrint("Comment: ${response.statusCode}");
     if (response.statusCode == 200) {
-      updatePagePost(post);
+      getNewPosts(isUpdate: true);
     } else {
       ApiChecker.checkApi(response);
     }
@@ -158,7 +164,7 @@ class PostController extends GetxController implements GetxService {
     Response response = await repo.updatePost(post);
     debugPrint("updatePost: ${response.statusCode}");
     if (response.statusCode == 200) {
-      updatePagePost(post);
+      getNewPosts(isUpdate: true);
     } else {
       ApiChecker.checkApi(response);
     }
@@ -186,29 +192,5 @@ class PostController extends GetxController implements GetxService {
     }
     _isLoading = false;
     update();
-  }
-
-  void updatePagePost(Post post) async {
-    Response response = await repo.getNewPosts("", currentPage, 5, 0);
-    if (response.statusCode == 200) {
-      var responseData = response.body;
-
-      if (responseData is Map<String, dynamic>) {
-        PostResponse convertPostResponse = PostResponse.fromJson(responseData);
-
-        _posts = convertPostResponse.content;
-        Post postUpdate = _posts.firstWhere(
-          (e) => e.id == post.id,
-        );
-        _postsCurrent = _postsCurrent.map((p) {
-          return p.id == postUpdate.id ? postUpdate : p;
-        }).toList();
-        update();
-      } else {
-        throw Exception("Unexpected response format");
-      }
-    } else {
-      ApiChecker.checkApi(response);
-    }
   }
 }

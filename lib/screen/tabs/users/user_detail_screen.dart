@@ -1,101 +1,166 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:timesheet/data/model/body/users/user.dart';
+import 'package:timesheet/controller/user_controller.dart';
 import 'package:timesheet/screen/tabs/setting/edit_profile_screen.dart';
 
 class UserDetailScreen extends StatelessWidget {
-  final User user;
-  UserDetailScreen({super.key, required this.user});
+  UserDetailScreen({super.key});
+
+  final UserController controller = Get.find<UserController>();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("User"),
+        title: Text("user_details".tr),
+        centerTitle: true,
         backgroundColor: Theme.of(context).secondaryHeaderColor,
-        elevation: 0,
+        elevation: 4,
         actions: [
           Container(
             margin: const EdgeInsets.all(8),
             decoration: BoxDecoration(
               color: Colors.grey.shade200,
               shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 4,
+                  offset: Offset(0, 2),
+                ),
+              ],
             ),
             child: IconButton(
-              icon: Icon(
+              icon: const Icon(
                 Icons.edit,
                 color: Colors.black87,
               ),
               onPressed: () {
-                Get.to(() => EditProfileScreen(user: user));
+                if (Get.find<UserController>().selectedUser.image == null ||
+                    Get.find<UserController>().selectedUser.image == "") {
+                  Get.find<UserController>().image = "";
+                } else {
+                  Get.find<UserController>().image =
+                      Get.find<UserController>().selectedUser.image!;
+                }
+                Get.to(() => EditProfileScreen(
+                      isMyProfile: false,
+                    ));
               },
             ),
           ),
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            CircleAvatar(
-              radius: 60,
-              backgroundColor: Colors.grey.shade300,
-              backgroundImage: user.image != null
-                  ? NetworkImage(user.getLinkImageUrl(user.image!))
-                  : const AssetImage("assets/image/avatarDefault.jpg")
-                      as ImageProvider,
+          padding: const EdgeInsets.all(16.0),
+          child: Obx(
+            () => Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.2),
+                        blurRadius: 10,
+                        offset: Offset(0, 4),
+                      ),
+                    ],
+                    border: Border.all(
+                      color: Theme.of(context).secondaryHeaderColor,
+                      width: 3,
+                    ),
+                  ),
+                  child: CircleAvatar(
+                    radius: 60,
+                    backgroundImage: (controller.selectedUser.image != "" &&
+                            controller.selectedUser.image != null)
+                        ? NetworkImage(controller.selectedUser
+                            .getLinkImageUrl(controller.selectedUser.image!))
+                        : AssetImage("assets/image/avatarDefault.jpg")
+                            as ImageProvider,
+                  ),
+                ),
+                SizedBox(height: 20),
+                Text(
+                  controller.selectedUser.displayName ?? "Unknown",
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).textTheme.bodyLarge?.color,
+                  ),
+                ),
+                SizedBox(height: 20),
+                _buildInfoCard("email".tr, Icons.email,
+                    controller.selectedUser.email ?? "N/A", context),
+                _buildInfoCard("username".tr, Icons.person,
+                    controller.selectedUser.username ?? "N/A", context),
+                _buildInfoCard(
+                  "status".tr,
+                  Icons.circle,
+                  controller.selectedUser.active == true
+                      ? "active".tr
+                      : "inactive".tr,
+                  context,
+                  color: controller.selectedUser.active == true
+                      ? Theme.of(context).secondaryHeaderColor
+                      : Colors.red,
+                ),
+                _buildInfoCard("birth_day".tr, Icons.cake,
+                    controller.selectedUser.dob ?? "N/A", context),
+                _buildInfoCard("birth_place".tr, Icons.place,
+                    controller.selectedUser.birthPlace ?? "N/A", context),
+                _buildInfoCard("university".tr, Icons.school,
+                    controller.selectedUser.university ?? "N/A", context),
+                _buildInfoCard("school_year".tr, Icons.calendar_today,
+                    controller.selectedUser.year?.toString() ?? "N/A", context),
+              ],
             ),
-            SizedBox(height: 16),
-            Text(
-              user.displayName ?? "Unknown User",
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).textTheme.bodyLarge?.color,
-              ),
-            ),
-            SizedBox(height: 16),
-            Divider(
-              color: Theme.of(context).secondaryHeaderColor,
-            ),
-            _buildInfoRow("Email", user.email ?? "N/A", context),
-            _buildInfoRow("Username", user.username ?? "N/A", context),
-            _buildInfoRow(
-                "Active", user.active == true ? "on" : "off", context),
-            _buildInfoRow("Birth Date", user.dob ?? "N/A", context),
-            _buildInfoRow("Birth Place", user.birthPlace ?? "N/A", context),
-            _buildInfoRow("University", user.university ?? "N/A", context),
-            _buildInfoRow("Year", user.year?.toString() ?? "N/A", context),
-            Divider(
-              color: Theme.of(context).secondaryHeaderColor,
-            ),
-          ],
-        ),
-      ),
+          )),
     );
   }
 
-  Widget _buildInfoRow(String title, String value, BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            title,
-            style: TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 16,
-                color: Theme.of(context).textTheme.bodyLarge?.color),
-          ),
-          Text(
-            value,
-            style: TextStyle(
-                fontSize: 16,
-                color: Theme.of(context).textTheme.bodySmall?.color),
-          ),
-        ],
+  Widget _buildInfoCard(
+      String title, IconData icon, String value, BuildContext context,
+      {Color? color}) {
+    return Card(
+      elevation: 2,
+      margin: EdgeInsets.symmetric(vertical: 8),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Row(
+          children: [
+            Icon(icon, color: color ?? Theme.of(context).secondaryHeaderColor),
+            SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                      color: Theme.of(context).textTheme.bodyLarge?.color,
+                    ),
+                  ),
+                  SizedBox(height: 4),
+                  Text(
+                    value,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Theme.of(context).textTheme.bodySmall?.color,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

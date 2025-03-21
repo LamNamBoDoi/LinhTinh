@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:timesheet/controller/post_controller.dart';
+import 'package:timesheet/controller/user_controller.dart';
 import 'package:timesheet/data/model/body/post/post.dart';
 import 'package:timesheet/screen/tabs/posting/comment_screen.dart';
 import 'package:intl/intl.dart';
@@ -28,19 +29,22 @@ class PostItem extends StatelessWidget {
               children: [
                 GestureDetector(
                   onTap: () => Get.to(() => PersonalPageScreen(
+                      isMyPost: post.user.id ==
+                              Get.find<UserController>().currentUser.id
+                          ? true
+                          : false,
                       userId: post.user.id!,
                       displayName: post.user.displayName!)),
                   child: Row(
                     children: [
                       CircleAvatar(
                         radius: 25,
-                        backgroundImage: post.user.image != null
-                            ? NetworkImage(post.user.getLinkImageUrl(
-                                post.user.image!)) // Hiển thị ảnh từ URL
-                            : null,
-                        child: post.user.image == null
-                            ? Icon(Icons.person, size: 30)
-                            : null,
+                        backgroundImage:
+                            (post.user.image != "" && post.user.image != null)
+                                ? NetworkImage(
+                                    post.user.getLinkImageUrl(post.user.image!))
+                                : AssetImage("assets/image/avatarDefault.jpg")
+                                    as ImageProvider,
                       ),
                       SizedBox(width: 10),
                       Column(
@@ -125,7 +129,7 @@ class PostItem extends StatelessWidget {
                     if (!postController.checkLike(post)) {
                       postController.likePost(post);
                     }
-                    postController.dislikePost(post);
+                    // postController.dislikePost(post);
                   },
                   icon: postController.checkLike(post)
                       ? const Icon(

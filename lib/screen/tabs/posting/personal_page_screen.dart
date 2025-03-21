@@ -10,10 +10,13 @@ import 'package:timesheet/screen/tabs/posting/widget/user_info_widget.dart';
 class PersonalPageScreen extends StatefulWidget {
   final int userId;
   final String displayName;
+  final bool isMyPost;
+
   const PersonalPageScreen({
     super.key,
     required this.userId,
     required this.displayName,
+    required this.isMyPost,
   });
 
   @override
@@ -24,13 +27,14 @@ class _PersonalPageScreenState extends State<PersonalPageScreen> {
   final UserController userController = Get.find<UserController>();
   final PostController postController = Get.find<PostController>();
 
-  RxBool selectPost = true.obs; // Trạng thái chọn tab
-  User? user; // Dữ liệu người dùng
-
+  RxBool selectPost = true.obs;
+  User? user;
   @override
   void initState() {
     super.initState();
-    _fetchUserPost();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _fetchUserPost();
+    });
   }
 
   Future<void> _fetchUserPost() async {
@@ -47,6 +51,8 @@ class _PersonalPageScreenState extends State<PersonalPageScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).secondaryHeaderColor,
+        title: Text("personal_page".tr),
+        centerTitle: true,
       ),
       body: GetBuilder<UserController>(
         builder: (controller) {
@@ -58,9 +64,10 @@ class _PersonalPageScreenState extends State<PersonalPageScreen> {
               const SizedBox(height: 20),
               CircleAvatar(
                 radius: 50,
-                backgroundImage: user!.image != null
-                    ? NetworkImage(user!.getLinkImageUrl(user!.image!))
-                    : const AssetImage("assets/image/avatarDefault.jpg")
+                backgroundImage: (user!.image != "" && user!.image != null)
+                    ? NetworkImage(user!
+                        .getLinkImageUrl(user!.image!)) // Hiển thị ảnh từ URL
+                    : AssetImage("assets/image/avatarDefault.jpg")
                         as ImageProvider,
               ),
               const SizedBox(height: 12),
@@ -75,7 +82,9 @@ class _PersonalPageScreenState extends State<PersonalPageScreen> {
               const Divider(height: 1, thickness: 1),
               Expanded(
                   child: Obx(() => selectPost.value
-                      ? _buildPostList()
+                      ? (widget.isMyPost == true
+                          ? _buildPostList()
+                          : const SizedBox())
                       : UserInfoWidget(
                           user: user!,
                         ))),

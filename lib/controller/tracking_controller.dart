@@ -24,8 +24,6 @@ class TrackingController extends GetxController implements GetxService {
 
   Future<void> getTrackingDate(DateTime selectedDay) async {
     await getTracking();
-    print(selectedDay);
-
     listTrackingDay.clear();
     for (Tracking tracking in _listTracking) {
       if (isSameDay(

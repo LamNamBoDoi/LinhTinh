@@ -48,8 +48,8 @@ class HomeScreen extends StatelessWidget {
                             icon: Icon(
                               Icons.check,
                               color: _selectedIndex.value == 0
-                                  ? Colors.green
-                                  : Colors.black,
+                                  ? Theme.of(context).secondaryHeaderColor
+                                  : Theme.of(context).iconTheme.color,
                             ),
                             onPressed: () => _selectedIndex.value = 0,
                           )),
@@ -58,7 +58,7 @@ class HomeScreen extends StatelessWidget {
                               Icons.track_changes,
                               color: _selectedIndex.value == 1
                                   ? Colors.green
-                                  : Colors.black,
+                                  : Theme.of(context).iconTheme.color,
                             ),
                             onPressed: () => _selectedIndex.value = 1,
                           )),
@@ -67,7 +67,7 @@ class HomeScreen extends StatelessWidget {
                               Icons.people,
                               color: _selectedIndex.value == 2
                                   ? Colors.green
-                                  : Colors.black,
+                                  : Theme.of(context).iconTheme.color,
                             ),
                             onPressed: () => _selectedIndex.value = 2,
                           )),
@@ -76,7 +76,7 @@ class HomeScreen extends StatelessWidget {
                               Icons.post_add,
                               color: _selectedIndex.value == 3
                                   ? Colors.green
-                                  : Colors.black,
+                                  : Theme.of(context).iconTheme.color,
                             ),
                             onPressed: () => _selectedIndex.value = 3,
                           )),
@@ -85,7 +85,7 @@ class HomeScreen extends StatelessWidget {
                               Icons.school,
                               color: _selectedIndex.value == 4
                                   ? Colors.green
-                                  : Colors.black,
+                                  : Theme.of(context).iconTheme.color,
                             ),
                             onPressed: () => _selectedIndex.value = 4,
                           )),
@@ -96,7 +96,7 @@ class HomeScreen extends StatelessWidget {
                               Icons.people,
                               color: _selectedIndex.value == 0
                                   ? Colors.green
-                                  : Colors.black,
+                                  : Theme.of(context).iconTheme.color,
                             ),
                             onPressed: () => _selectedIndex.value = 0,
                           )),
@@ -105,7 +105,7 @@ class HomeScreen extends StatelessWidget {
                               Icons.school,
                               color: _selectedIndex.value == 1
                                   ? Colors.green
-                                  : Colors.black,
+                                  : Theme.of(context).iconTheme.color,
                             ),
                             onPressed: () => _selectedIndex.value = 1,
                           )),
