@@ -9,6 +9,7 @@ import 'package:timesheet/data/model/body/post/post.dart';
 import 'package:timesheet/data/model/body/post/post_response.dart';
 import 'package:timesheet/data/model/body/users/user.dart';
 import 'package:timesheet/data/repository/post_repo.dart';
+import 'package:timesheet/view/custom_snackbar.dart';
 
 class PostController extends GetxController implements GetxService {
   final PostRepo repo;
@@ -38,7 +39,7 @@ class PostController extends GetxController implements GetxService {
       await getNewPosts(isUpdate: false);
     } else {
       _postsByUser.clear();
-      await getNewPostsByUser(keyWord);
+      await getNewPostsByUser(keyWord, isUpdate: false);
     }
   }
 
@@ -63,7 +64,6 @@ class PostController extends GetxController implements GetxService {
       if (responseData is Map<String, dynamic>) {
         PostResponse convertPostResponse = PostResponse.fromJson(responseData);
         _posts = convertPostResponse.content;
-        _posts = convertPostResponse.content;
         if (isUpdate) {
           _postsCurrent.replaceRange(0, _postsCurrent.length, _posts);
         } else {
@@ -79,19 +79,27 @@ class PostController extends GetxController implements GetxService {
     update();
   }
 
-  Future<void> getNewPostsByUser(String keyWord) async {
+  Future<void> getNewPostsByUser(
+    String keyWord, {
+    required bool isUpdate,
+  }) async {
     _isLoading = true;
     update();
+    Response response = isUpdate
+        ? await repo.getNewPostsByUser("", 1, 5 * currentPage, 0)
+        : await repo.getNewPostsByUser("", currentPage, 5, 0);
 
-    Response response =
-        await repo.getNewPostsByUser(keyWord, currentPage, 5, 0);
     debugPrint("okeoke: ${response.statusCode}");
     if (response.statusCode == 200) {
       var responseData = response.body;
       if (responseData is Map<String, dynamic>) {
         PostResponse convertPostResponse = PostResponse.fromJson(responseData);
         _posts = convertPostResponse.content;
-        _postsByUser.addAll(_posts);
+        if (isUpdate) {
+          _postsByUser.replaceRange(0, _postsByUser.length, _posts);
+        } else {
+          _postsByUser.addAll(_posts);
+        }
       } else {
         throw Exception("Unexpected response format");
       }
@@ -102,7 +110,7 @@ class PostController extends GetxController implements GetxService {
     update();
   }
 
-  Future<void> likePost(Post post) async {
+  Future<void> likePost(Post post, {required bool isPersonPage}) async {
     _isLoading = true;
     update();
     UserController userController = Get.find<UserController>();
@@ -117,7 +125,9 @@ class PostController extends GetxController implements GetxService {
     Response response = await repo.likePost(like, post);
     debugPrint("Like: ${response.statusCode}");
     if (response.statusCode == 200) {
-      getNewPosts(isUpdate: true);
+      isPersonPage
+          ? await getNewPostsByUser("", isUpdate: true)
+          : await getNewPosts(isUpdate: true);
     } else {
       ApiChecker.checkApi(response);
     }
@@ -130,14 +140,18 @@ class PostController extends GetxController implements GetxService {
     update();
     User user = Get.find<UserController>().currentUser;
     List<Like>? likes = post.likes;
+    print(likes?.length);
     likes?.removeWhere((like) => like.user!.id == user.id);
+    print(likes?.length);
     post.likes = likes;
+    print(post.likes);
     updatePost(post);
     _isLoading = false;
     update();
   }
 
-  Future<void> commentPost(String content, Post post) async {
+  Future<void> commentPost(String content, Post post,
+      {required bool isPersonPage}) async {
     _isLoading = true;
     update();
     UserController userController = Get.find<UserController>();
@@ -150,7 +164,9 @@ class PostController extends GetxController implements GetxService {
     Response response = await repo.commentPost(comment, post);
     debugPrint("Comment: ${response.statusCode}");
     if (response.statusCode == 200) {
-      getNewPosts(isUpdate: true);
+      isPersonPage
+          ? await getNewPostsByUser("", isUpdate: true)
+          : await getNewPosts(isUpdate: true);
     } else {
       ApiChecker.checkApi(response);
     }
@@ -187,7 +203,10 @@ class PostController extends GetxController implements GetxService {
     debugPrint("CreatePost: ${response.statusCode}");
     if (response.statusCode == 200) {
       resetListPost("");
+      showCustomFlash("create_post_successfully".tr, Get.context!,
+          isError: false);
     } else {
+      showCustomFlash("create_post_failed".tr, Get.context!, isError: true);
       ApiChecker.checkApi(response);
     }
     _isLoading = false;

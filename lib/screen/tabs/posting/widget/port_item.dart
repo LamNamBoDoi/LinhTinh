@@ -6,12 +6,18 @@ import 'package:timesheet/data/model/body/post/post.dart';
 import 'package:timesheet/screen/tabs/posting/comment_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:timesheet/screen/tabs/posting/personal_page_screen.dart';
+import 'package:timesheet/view/custom_snackbar.dart';
 
 class PostItem extends StatelessWidget {
   final Post post;
   final PostController postController;
+  final bool isPersonPage;
 
-  const PostItem({Key? key, required this.post, required this.postController})
+  const PostItem(
+      {Key? key,
+      required this.post,
+      required this.postController,
+      required this.isPersonPage})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -127,9 +133,11 @@ class PostItem extends StatelessWidget {
                 TextButton.icon(
                   onPressed: () {
                     if (!postController.checkLike(post)) {
-                      postController.likePost(post);
+                      postController.likePost(post, isPersonPage: isPersonPage);
+                    } else {
+                      // postController.dislikePost(post);
+                      showCustomSnackBar("Chưa xóa like được", isError: true);
                     }
-                    // postController.dislikePost(post);
                   },
                   icon: postController.checkLike(post)
                       ? const Icon(
@@ -154,13 +162,13 @@ class PostItem extends StatelessWidget {
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
                             CommentScreen(
+                          isPersonPage: isPersonPage,
                           post: post,
                         ),
                         transitionsBuilder:
                             (context, animation, secondaryAnimation, child) {
-                          const begin = Offset(0.0, 1.0); // Bắt đầu từ dưới
-                          const end =
-                              Offset.zero; // Kết thúc tại vị trí bình thường
+                          const begin = Offset(0.0, 1.0);
+                          const end = Offset.zero;
                           const curve = Curves.easeInOut;
                           var tween = Tween(begin: begin, end: end)
                               .chain(CurveTween(curve: curve));

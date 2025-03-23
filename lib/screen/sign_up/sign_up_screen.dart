@@ -314,15 +314,10 @@ class SignUpScreen extends StatelessWidget {
       ))
           .then((value) {
         if (value == 200 || value == 201) {
-          showCustomSnackBar('register_success'.tr, isError: false);
           Get.offAll(SignInScreen(),
               transition: Transition.cupertinoDialog,
               duration: Duration(milliseconds: 500),
               curve: Curves.easeIn);
-        } else if (value == 400) {
-          showCustomSnackBar('infomation_incorect'.tr);
-        } else {
-          showCustomSnackBar('please_try_again'.tr);
         }
       });
     }

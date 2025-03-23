@@ -13,7 +13,6 @@ class PhotoController extends GetxController implements GetxService {
   bool isLoading = false;
   File? selectedPhoto;
   Photo? _photo;
-
   Photo? get photo => _photo;
 
   Future<void> pickImage(ImageSource source) async {
@@ -42,8 +41,6 @@ class PhotoController extends GetxController implements GetxService {
 
     if (selectedPhoto == null ||
         selectedPhoto!.lengthSync() / 1024 / 1024 > 1) {
-      // showCustomSnackBar("please_select_another_photo".trParams(),
-      // isError: true);
       return 400;
     }
     print(

@@ -53,47 +53,40 @@ class FillTrackingWidget extends StatelessWidget {
         const SizedBox(height: 40),
         CustomButton(
           buttonText: update == true ? "save".tr : "create".tr,
-          onPressed: () => _createUpdateTracking(trackingController, context),
+          onPressed: () => _createUpdateTracking(trackingController),
         ),
       ],
     );
   }
 
-  void _createUpdateTracking(
-      TrackingController trackingController, BuildContext context) {
+  void _createUpdateTracking(TrackingController trackingController) {
     if (update == null || update == false) {
+      print(formKey.currentState!.validate());
       if (formKey.currentState!.validate()) {
         trackingController
             .addTracking(contentController.text, timeSelect)
             .then((value) {
           if (value == 200 || value == 201) {
-            showCustomSnackBar("success".tr, isError: false);
             contentController.text = '';
-          } else {
-            showCustomSnackBar("fail".tr, isError: false);
           }
         });
       } else {
-        showCustomSnackBar("please_fill_in_completely".tr, isError: true);
+        showCustomFlash("please_fill_in_completely".tr, Get.context!,
+            isError: true);
+        return;
       }
     } else {
       if (trackingController.change == true) {
-        print(DateTime.fromMillisecondsSinceEpoch(tracking!.date!));
-        if (contentController.text != '') {
-          trackingController
-              .updateTracking(tracking!, contentController.text, timeSelect)
-              .then((value) {
-            if (value == 200 || value == 201) {
-              showCustomSnackBar("success".tr, isError: false);
-            } else {
-              showCustomSnackBar("fail".tr, isError: true);
-            }
-          });
+        if (formKey.currentState!.validate()) {
+          trackingController.updateTracking(
+              tracking!, contentController.text, timeSelect);
         } else {
-          showCustomFlash("fail".tr, context, isError: true);
+          showCustomFlash("please_fill_in_completely".tr, Get.context!,
+              isError: true);
+          return;
         }
       }
-      Get.offAllNamed(RouteHelper.home);
     }
+    Get.offAllNamed(RouteHelper.home);
   }
 }

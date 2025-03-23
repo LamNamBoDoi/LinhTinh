@@ -126,7 +126,7 @@ class User {
         // roles == other.roles &&
         gender == other.gender &&
         // hasPhoto == other.hasPhoto &&
-        tokenDevice == other.tokenDevice &&
+        // tokenDevice == other.tokenDevice &&
         university == other.university &&
         year == other.year;
   }

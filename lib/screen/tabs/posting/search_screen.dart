@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:timesheet/controller/post_controller.dart';
 import 'package:timesheet/controller/user_controller.dart';
 import 'package:timesheet/data/model/body/users/user.dart';
 import 'package:timesheet/screen/tabs/posting/personal_page_screen.dart';
@@ -28,9 +29,11 @@ class _SearchScreenState extends State<SearchScreen> {
           backgroundColor: Colors.white,
           elevation: 0.5,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.black),
-            onPressed: () => Get.back(),
-          ),
+              icon: const Icon(Icons.arrow_back, color: Colors.black),
+              onPressed: () async {
+                await Get.find<PostController>().resetListPost("");
+                Get.back();
+              }),
           title: TextField(
               controller: _searchController,
               style: TextStyle(color: Colors.black),

@@ -5,6 +5,7 @@ import 'package:timesheet/data/model/body/time_sheet.dart';
 import 'package:timesheet/data/repository/timesheet_repo.dart';
 import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:timesheet/view/custom_snackbar.dart';
 import '../data/api/api_checker.dart';
 
 class TimeSheetController extends GetxController implements GetxService {
@@ -88,7 +89,11 @@ class TimeSheetController extends GetxController implements GetxService {
       attendanced = true;
       timeSheets.add(timeSheet);
       getEventsCalendar();
+      handleProgressInMonth(DateTime.now());
+      showCustomFlash("Điểm danh thành công", Get.context!, isError: false);
     } else {
+      showCustomFlash("Điểm danh thất bại", Get.context!, isError: true);
+
       ApiChecker.checkApi(response);
     }
     _isLoading = false;

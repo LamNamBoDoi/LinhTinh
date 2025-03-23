@@ -9,10 +9,12 @@ class CommentInputWidget extends StatelessWidget {
       {super.key,
       required this.postController,
       required this.commentController,
-      required this.post});
+      required this.post,
+      required this.isPersonPage});
   final PostController postController;
   final TextEditingController commentController;
   final Post post;
+  final isPersonPage;
   @override
   Widget build(BuildContext context) {
     final UserController userController = Get.find<UserController>();
@@ -52,7 +54,9 @@ class CommentInputWidget extends StatelessWidget {
             onPressed: () {
               String commentText = commentController.text;
               if (commentText.isNotEmpty) {
-                postController.commentPost(commentText, post);
+                postController.commentPost(commentText, post,
+                    isPersonPage: isPersonPage);
+                // print("Comment: $commentText");
                 commentController.clear();
               }
             },

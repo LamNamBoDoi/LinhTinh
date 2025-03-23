@@ -60,13 +60,21 @@ class _SettingScreenState extends State<SettingScreen> {
                                     switch (index) {
                                       case 0:
                                         return SwitchListTile(
-                                          secondary: const Icon(Icons.dark_mode,
-                                              color: Colors.blue),
-                                          title: Text("dark_color_mode".tr),
-                                          value: themeController.darkTheme!,
-                                          onChanged: (_) =>
-                                              themeController.toggleTheme(),
-                                        );
+                                            secondary: const Icon(
+                                                Icons.dark_mode,
+                                                color: Colors.blue),
+                                            title: Text("dark_color_mode".tr),
+                                            value: themeController.darkTheme!,
+                                            onChanged: (_) {
+                                              themeController.toggleTheme();
+                                              themeController.darkTheme == true
+                                                  ? showCustomFlash(
+                                                      "dark_mode".tr, context,
+                                                      isError: false)
+                                                  : showCustomFlash(
+                                                      "bright_mode".tr, context,
+                                                      isError: false);
+                                            });
                                       case 1:
                                         return SettingItem(
                                           icon: Icons.notifications,
@@ -82,9 +90,12 @@ class _SettingScreenState extends State<SettingScreen> {
                                               userController.image =
                                                   userController
                                                       .currentUser.image!;
+                                              userController.userUpdate =
+                                                  userController.currentUser;
                                               Get.to(() => EditProfileScreen(
-                                                    isMyProfile: true,
-                                                  ));
+                                                  isMyProfile: true,
+                                                  user: userController
+                                                      .userUpdate));
                                             });
                                       case 3:
                                         String languageName = AppConstants
@@ -168,21 +179,65 @@ class _SettingScreenState extends State<SettingScreen> {
   void _showLanguageBottomSheet(LocalizationController controller) {
     Get.bottomSheet(
       Container(
-        color: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: Theme.of(context).secondaryHeaderColor,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: AppConstants.languages.map((lang) {
-            return ListTile(
-              title: Text(lang.languageName,
-                  style: const TextStyle(color: Colors.black)),
-              onTap: () {
-                controller
-                    .setLanguage(Locale(lang.languageCode, lang.countryCode));
-                Get.back();
-              },
+            final isCurrentLanguage =
+                controller.locale.languageCode == lang.languageCode;
+
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              margin: const EdgeInsets.symmetric(vertical: 5),
+              decoration: BoxDecoration(
+                color: isCurrentLanguage ? Colors.black : Colors.white,
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 5,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: ListTile(
+                leading: isCurrentLanguage
+                    ? Icon(Icons.check_circle,
+                        color: Theme.of(context).primaryColor)
+                    : const SizedBox(),
+                title: Text(
+                  lang.languageName,
+                  style: TextStyle(
+                    color: isCurrentLanguage ? Colors.white : Colors.black,
+                    fontWeight:
+                        isCurrentLanguage ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+                onTap: () {
+                  if (!isCurrentLanguage) {
+                    controller.setLanguage(
+                        Locale(lang.languageCode, lang.countryCode));
+                    showCustomFlash("changed_language".tr, context,
+                        isError: false);
+                  }
+                  Get.back();
+                },
+              ),
             );
           }).toList(),
+        ),
+      ),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
         ),
       ),
     );
@@ -191,11 +246,12 @@ class _SettingScreenState extends State<SettingScreen> {
   void _handleLogout(AuthController authController) {
     authController.logOut().then((response) {
       if (response == 200) {
-        showCustomFlash("Đăng xuất thành công", Get.context!, isError: false);
+        showCustomFlash("Đăng xuất thành công".tr, Get.context!,
+            isError: false);
         Get.find<UserController>().resetDataProfile();
         Get.offAll(() => SignInScreen());
       } else {
-        showCustomFlash("Đăng xuất thất bại", Get.context!, isError: true);
+        showCustomFlash("Đăng xuất thất bại".tr, Get.context!, isError: true);
       }
     });
   }

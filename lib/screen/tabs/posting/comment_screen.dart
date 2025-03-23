@@ -6,9 +6,10 @@ import 'package:timesheet/screen/tabs/posting/widget/comment_input_widget.dart';
 import 'package:timesheet/screen/tabs/posting/widget/comment_item.dart';
 
 class CommentScreen extends StatefulWidget {
-  const CommentScreen({super.key, required this.post});
+  const CommentScreen(
+      {super.key, required this.post, required this.isPersonPage});
   final Post post;
-
+  final bool isPersonPage;
   @override
   State<CommentScreen> createState() => _CommentScreenState();
 }
@@ -77,10 +78,15 @@ class _CommentScreenState extends State<CommentScreen> {
       ),
       body: GetBuilder<PostController>(
         builder: (controller) {
-          Post? updatedPost = controller.postsCurrent.firstWhere(
-            (p) => p.id == widget.post.id,
-            orElse: () => widget.post,
-          );
+          Post? updatedPost = widget.isPersonPage
+              ? controller.postsByUser.firstWhere(
+                  (p) => p.id == widget.post.id,
+                  orElse: () => widget.post,
+                )
+              : controller.postsCurrent.firstWhere(
+                  (p) => p.id == widget.post.id,
+                  orElse: () => widget.post,
+                );
 
           return Stack(
             children: [
@@ -102,6 +108,7 @@ class _CommentScreenState extends State<CommentScreen> {
                     ),
                   ),
                   CommentInputWidget(
+                    isPersonPage: widget.isPersonPage,
                     commentController: _commentController,
                     post: widget.post,
                     postController: controller,

@@ -78,7 +78,7 @@ class _ChangeAvatarWidgetState extends State<ChangeAvatarWidget> {
         return Container(
           padding: EdgeInsets.all(10),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).secondaryHeaderColor,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
           child: Column(

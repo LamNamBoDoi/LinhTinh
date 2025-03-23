@@ -49,7 +49,7 @@ class CalendarWidget extends StatelessWidget {
       ),
       availableGestures: AvailableGestures.all,
       calendarStyle: CalendarStyle(
-        markerDecoration: BoxDecoration(
+        markerDecoration: const BoxDecoration(
           color: Colors.blue,
           shape: BoxShape.circle,
         ),

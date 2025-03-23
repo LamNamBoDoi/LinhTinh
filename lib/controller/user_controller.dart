@@ -17,9 +17,13 @@ class UserController extends GetxController implements GetxService {
   bool _loading = false;
   bool isMyProfile = false;
   bool isAdmin = false;
-  Rx<User> _selectedUser = User().obs;
-  User get selectedUser => _selectedUser.value;
-  set selectedUser(User value) => _selectedUser.value = value;
+  User _selectedUser = User();
+  User get selectedUser => _selectedUser;
+  set selectedUser(User user) {
+    _selectedUser = user;
+    update();
+  }
+
   List<User> _listUsers = <User>[];
   List<User> _usersPage = <User>[];
   List<User> _usersPageCurrent = <User>[];
@@ -57,6 +61,7 @@ class UserController extends GetxController implements GetxService {
     _usersPage.clear();
     _usersPageCurrent.clear();
     _listFilteredUsers.clear();
+    query = "";
     await getListUsersPage(isUpdate: false);
     await getListUsers();
   }
@@ -98,7 +103,7 @@ class UserController extends GetxController implements GetxService {
 
     if (response.statusCode == 200) {
       _currentUser = User.fromJson(response.body);
-      if (_currentUser.username == "admin1" &&
+      if (_currentUser.username == "admin" &&
           _currentUser.email == "admin@globits.net") isAdmin = true;
       image = _currentUser.image ?? "";
     } else {
@@ -112,8 +117,9 @@ class UserController extends GetxController implements GetxService {
     _loading = true;
     update();
     int size = isUpdate ? currentPage * 20 : 20;
+    int page = isUpdate ? 1 : currentPage;
     try {
-      PageableResponse? pagedResponse = await _fetchUsers(currentPage, size);
+      PageableResponse? pagedResponse = await _fetchUsers(page, size);
       if (pagedResponse != null) {
         _usersPage = pagedResponse.content;
         _usersPageCurrent.addAll(_usersPage);
@@ -150,11 +156,13 @@ class UserController extends GetxController implements GetxService {
     update();
     Response response = await repo.updateUserMySelf(user);
     debugPrint("updateUserMySelf: ${response.statusCode}");
-    print(response.body);
     if (response.statusCode == 200) {
       _currentUser = User.fromJson(response.body);
       _userUpdate = _currentUser;
+      showCustomFlash("update_profile_successfully".tr, Get.context!,
+          isError: false);
     } else {
+      showCustomFlash("update_profile_failed".tr, Get.context!, isError: true);
       ApiChecker.checkApi(response);
     }
     _loading = false;
@@ -168,13 +176,19 @@ class UserController extends GetxController implements GetxService {
     update();
     Response response = await repo.updateUserById(user);
     debugPrint("updateUserById: ${response.statusCode}");
+    print(response.body);
     if (response.statusCode == 200) {
-      _selectedUser.value = User.fromJson(response.body);
-      _userUpdate = _selectedUser.value;
+      _selectedUser = User.fromJson(response.body);
+      _image = _selectedUser.image ?? "";
+      _userUpdate = _selectedUser;
       await getListUsersPage(isUpdate: true);
       await getListUsers();
       searchUsers(query);
+      Get.find<PhotoController>().resetPickImage();
+      showCustomFlash("update_profile_successfully".tr, Get.context!,
+          isError: false);
     } else {
+      showCustomFlash("update_profile_failed".tr, Get.context!, isError: true);
       ApiChecker.checkApi(response);
     }
     _loading = false;
@@ -203,11 +217,18 @@ class UserController extends GetxController implements GetxService {
     update();
     Response response = await repo.blockUser(id.toString());
     debugPrint("blockUser: ${response.statusCode}");
-
     if (response.statusCode == 200) {
-      showCustomSnackBar("success".tr, isError: false);
+      _selectedUser = User.fromJson(response.body);
+      _userUpdate = _selectedUser;
+      print(_userUpdate.active);
+      await getListUsersPage(isUpdate: true);
+      await getListUsers();
+      searchUsers(query);
+      showCustomFlash("account_locked_successfully".tr, Get.context!,
+          isError: false);
     } else {
-      showCustomSnackBar("fail".tr, isError: true);
+      showCustomFlash("account_locked_failed".tr, Get.context!, isError: true);
+
       ApiChecker.checkApi(response);
     }
 

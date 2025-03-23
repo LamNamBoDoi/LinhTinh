@@ -76,6 +76,7 @@ class _PostingScreenState extends State<PostingScreen> {
                     padding: const EdgeInsets.all(10),
                     itemCount: controller.postsCurrent.length,
                     itemBuilder: (context, index) => PostItem(
+                      isPersonPage: false,
                       post: controller.postsCurrent[index],
                       postController: controller,
                     ),

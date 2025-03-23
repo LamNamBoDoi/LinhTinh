@@ -66,7 +66,7 @@ class SignInScreen extends StatelessWidget {
             ),
           ),
         ),
-        SizedBox(
+        const SizedBox(
           height: 20,
         ),
       ],
@@ -142,20 +142,23 @@ class SignInScreen extends StatelessWidget {
     String username = _usernameController.text;
     String password = _passwordController.text;
     if (username.isEmpty || password.isEmpty) {
-      showCustomSnackBar("you_need_enter_your_acount".tr);
+      showCustomFlash("you_need_enter_your_acount".tr, Get.context!,
+          isError: true);
     } else {
       Get.find<AuthController>().login(username, password).then((value) async {
         if (value == 200) {
           await Get.find<UserController>().getCurrentUser();
-          showCustomSnackBar("success".tr, isError: false);
+          showCustomFlash("signed_in_successfully".tr, Get.context!,
+              isError: false);
           Get.offAll(HomeScreen(),
               transition: Transition.cupertinoDialog,
               duration: Duration(milliseconds: 500),
               curve: Curves.easeIn);
         } else if (value == 400) {
-          showCustomSnackBar("account_password_is_incorrect".tr);
+          showCustomFlash("account_password_is_incorrect".tr, Get.context!,
+              isError: true);
         } else {
-          showCustomSnackBar("please_try_again".tr);
+          showCustomFlash("please_try_again".tr, Get.context!, isError: true);
         }
         Get.find<UserController>().getCurrentUser();
       });

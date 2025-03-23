@@ -5,9 +5,7 @@ import 'package:timesheet/screen/tabs/setting/edit_profile_screen.dart';
 
 class UserDetailScreen extends StatelessWidget {
   UserDetailScreen({super.key});
-
-  final UserController controller = Get.find<UserController>();
-
+  UserController userController = Get.find<UserController>();
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,15 +34,16 @@ class UserDetailScreen extends StatelessWidget {
                 color: Colors.black87,
               ),
               onPressed: () {
-                if (Get.find<UserController>().selectedUser.image == null ||
-                    Get.find<UserController>().selectedUser.image == "") {
-                  Get.find<UserController>().image = "";
+                if (userController.selectedUser.image == null ||
+                    userController.selectedUser.image == "") {
+                  userController.image = "";
                 } else {
-                  Get.find<UserController>().image =
-                      Get.find<UserController>().selectedUser.image!;
+                  userController.image = userController.selectedUser.image!;
                 }
+                userController.userUpdate = userController.selectedUser;
                 Get.to(() => EditProfileScreen(
                       isMyProfile: false,
+                      user: userController.userUpdate,
                     ));
               },
             ),
@@ -53,8 +52,8 @@ class UserDetailScreen extends StatelessWidget {
       ),
       body: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
-          child: Obx(
-            () => Column(
+          child: GetBuilder<UserController>(
+            builder: (controller) => Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(

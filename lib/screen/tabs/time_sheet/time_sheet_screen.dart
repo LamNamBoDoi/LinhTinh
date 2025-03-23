@@ -5,7 +5,6 @@ import 'package:timesheet/controller/tracking_controller.dart';
 import 'package:timesheet/screen/tabs/time_sheet/widget/calendar_widget.dart';
 import 'package:timesheet/screen/tabs/time_sheet/widget/pageview_widget.dart';
 import 'package:timesheet/view/custom_button.dart';
-import 'package:timesheet/view/custom_snackbar.dart';
 
 class TimeSheetScreen extends StatelessWidget {
   const TimeSheetScreen({super.key});
@@ -48,9 +47,9 @@ class TimeSheetScreen extends StatelessWidget {
                       children: [
                         CustomButton(
                           off: timeSheetController.attendanced,
-                          onPressed: () {
+                          onPressed: () async {
                             if (timeSheetController.attendanced == false)
-                              handleCheckin(timeSheetController);
+                              await timeSheetController.checkIn();
                           },
                           width: 180,
                           height: 50,
@@ -70,15 +69,5 @@ class TimeSheetScreen extends StatelessWidget {
         },
       ),
     );
-  }
-
-  void handleCheckin(TimeSheetController timeSheetController) async {
-    await timeSheetController.checkIn().then((value) {
-      if (value == 200 || value == 201) {
-        showCustomSnackBar("success".tr, isError: false);
-      } else {
-        showCustomSnackBar("faild".tr);
-      }
-    });
   }
 }

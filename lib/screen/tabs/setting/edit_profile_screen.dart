@@ -14,8 +14,10 @@ import 'package:timesheet/view/custom_snackbar.dart';
 import 'package:timesheet/view/custom_text_field.dart';
 
 class EditProfileScreen extends StatefulWidget {
-  EditProfileScreen({super.key, required this.isMyProfile});
+  const EditProfileScreen(
+      {super.key, required this.isMyProfile, required this.user});
   final bool isMyProfile;
+  final User user;
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
 }
@@ -35,16 +37,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final TextEditingController _yearTextController = TextEditingController();
   final _valueGender = Rx<String?>("");
   final _formKey = GlobalKey<FormState>();
-  DateTime? _timeBirthday = null;
+  DateTime? _timeBirthday;
   RxBool _activeUser = true.obs;
-  RxBool _validateGender = true.obs;
+  final RxBool _validateGender = true.obs;
   @override
   void initState() {
     super.initState();
+    user = widget.user;
     PhotoController photoController = Get.find<PhotoController>();
-    user = widget.isMyProfile
-        ? Get.find<UserController>().currentUser
-        : Get.find<UserController>().selectedUser;
+
     photoController.selectedPhoto = null;
     _activeUser = RxBool(user.active ?? true);
     _displayNameTextController.text = user.displayName ?? "";
@@ -62,20 +63,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return Scaffold(
         appBar: AppBar(
           title: Text("edit_profile".tr),
+          centerTitle: true,
           backgroundColor: Theme.of(context).secondaryHeaderColor,
         ),
         body: GetBuilder<UserController>(
           builder: (controller) => Stack(
             children: [
               SingleChildScrollView(
-                padding: EdgeInsets.all(20.0),
+                padding: const EdgeInsets.all(20.0),
                 child: Form(
                   key: _formKey,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       ChangeAvatarWidget(isMyProfile: widget.isMyProfile),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       Obx(
                         () => SwitchListTile(
                             title: Text("account_status".tr,
@@ -87,7 +89,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                         .bodyLarge!
                                         .color)),
                             value: _activeUser.value,
-                            onChanged: (value) => _blockUser(value)),
+                            onChanged: (value) => _blockUser(value, user)),
                       ),
                       CustomTextField(
                         controller: _displayNameTextController,
@@ -101,7 +103,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         enabled: true,
                         // validator: (value) =>
                         //     value!.isEmpty ? 'please_enter_birth_day'.tr : null,
-                        lastIcon: Icon(Icons.calendar_month),
+                        lastIcon: const Icon(Icons.calendar_month),
                         onPressedLastIcon: () async {
                           final DateTime? dateTime =
                               await showRoundedDatePicker(
@@ -109,13 +111,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             fontFamily: 'NotoSerif',
                             firstDate: DateTime(1950),
                             lastDate: DateTime(2026),
-                            locale: Locale('en', 'US'),
+                            locale: const Locale('en', 'US'),
                             borderRadius: 16,
                             height: 250,
-                            imageHeader: AssetImage(Images.bgDate),
+                            imageHeader: const AssetImage(Images.bgDate),
                             styleDatePicker: MaterialRoundedDatePickerStyle(
                               textStyleDayHeader:
-                                  TextStyle(color: Colors.amber),
+                                  const TextStyle(color: Colors.amber),
                             ),
                             initialDate: DateTime.now(),
                           );
@@ -166,9 +168,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         width: double.infinity,
                         buttonText: "update".tr,
                         onPressed: () {
-                          controller.userUpdate = user;
-                          if (controller.loading == false)
+                          if (controller.loading == false) {
                             _updateProfile(controller.userUpdate);
+                          }
                         },
                       ),
                     ],
@@ -201,15 +203,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (genderValue == null || genderValue.isEmpty) {
         _validateGender.value = false;
       }
-      showCustomSnackBar('cannot_left_blank'.tr);
+      showCustomFlash('cannot_left_blank'.tr, Get.context!, isError: true);
       return;
     }
     int response = 0;
     if (photoController.selectedPhoto != null) {
       response = await photoController.uploadImageUrl().then((response) {
         if (response != 200) {
-          Get.snackbar("error".tr, "please_select_another_photo".tr,
-              backgroundColor: Colors.red, colorText: Colors.white);
+          showCustomFlash("please_select_another_photo".tr, Get.context!,
+              isError: true);
         }
         return response;
       });
@@ -226,14 +228,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           hasPhoto: true,
           password: updateUser.password,
           confirmPassword: updateUser.password,
-          active: true,
+          active: updateUser.active,
           dob: dateBirthDay,
           changePass: null,
           tokenDevice: deviceToken,
           roles: updateUser.roles,
-          year: _yearTextController.text.isNotEmpty
+          year: (_yearTextController.text.isNotEmpty &&
+                  _yearTextController.text != "null")
               ? int.parse(_yearTextController.text)
-              : updateUser.year,
+              : updateUser.year ?? 0,
           university: _universityTextController.text);
       if (user.tokenDevice != deviceToken) {
         userController.updateTokenDevice(deviceToken!);
@@ -244,23 +247,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         } else {
           await userController.updateUserMySelf(user).then((response) async {
             if (response == 200) {
-              showCustomFlash("success".tr, context, isError: false);
               await Get.find<UserController>().getCurrentUser();
-            } else {
-              showCustomFlash("fail".tr, context);
             }
           });
         }
       } else if (userController.isAdmin == true) {
-        if (userController.currentUser.isEqual(user)) {
+        if (userController.selectedUser.isEqual(user)) {
           showCustomFlash("nothing_changed".tr, context, isError: true);
         } else {
           await userController.updateUserById(user).then((response) async {
             if (response == 200) {
               _validateGender.value = true;
-              showCustomFlash("success".tr, context, isError: false);
-            } else {
-              showCustomFlash("fail".tr, context);
             }
           });
         }
@@ -268,10 +265,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
   }
 
-  void _blockUser(bool value) {
+  void _blockUser(bool value, User user) {
+    FocusScope.of(context).unfocus();
     if (_activeUser.value == true) {
       if (widget.isMyProfile) {
-        if (Get.find<UserController>().currentUser.username != "admin1") {
+        if (Get.find<UserController>().isAdmin == false) {
           showCustomConfirm(context, "change_account_status".tr, () {
             _activeUser.value = value;
             Get.find<UserController>().blockUser(user.id!).then(
@@ -280,12 +278,32 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           });
         }
       } else {
-        if (Get.find<UserController>().currentUser.username == "admin1" &&
-            Get.find<UserController>().selectedUser.username != "admin1") {
+        if (Get.find<UserController>().isAdmin &&
+            Get.find<UserController>().selectedUser.username != "admin") {
           showCustomConfirm(context, "change_account_status".tr, () {
             _activeUser.value = value;
             Get.find<UserController>().blockUser(user.id!).then(
                 (_) async => await Get.find<UserController>().getListUsers());
+            Navigator.pop(context);
+          });
+        }
+      }
+    } else {
+      user.active = true;
+      if (widget.isMyProfile) {
+        if (Get.find<UserController>().isAdmin == false) {
+          showCustomConfirm(context, "change_account_status".tr, () {
+            _activeUser.value = value;
+            Get.find<UserController>().updateUserMySelf(user);
+            Navigator.pop(context);
+          });
+        }
+      } else {
+        if (Get.find<UserController>().isAdmin &&
+            Get.find<UserController>().selectedUser.username != "admin") {
+          showCustomConfirm(context, "change_account_status".tr, () {
+            _activeUser.value = value;
+            Get.find<UserController>().updateUserById(user);
             Navigator.pop(context);
           });
         }
