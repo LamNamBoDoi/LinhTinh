@@ -11,7 +11,7 @@ class NotifyScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Thông báo",
+        title: Text("notification".tr,
             style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Theme.of(context).secondaryHeaderColor,
         centerTitle: true,
@@ -24,8 +24,8 @@ class NotifyScreen extends StatelessWidget {
           }
 
           if (controller.listNotifys.isEmpty) {
-            return const Center(
-                child: Text("Không có thông báo nào.",
+            return Center(
+                child: Text("no_notifications".tr,
                     style: TextStyle(fontSize: 16)));
           }
 

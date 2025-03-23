@@ -25,14 +25,11 @@ import 'helper/route_helper.dart';
 
 Future<void> main() async {
   if (kDebugMode) {
-    // kiểm tra xem có đang chạy ở chế độ debug ko
     print("Bắt đầu: ${DateTime.now()}");
   }
   WidgetsBinding widgetsBinding =
       WidgetsFlutterBinding.ensureInitialized(); // khởi tạo
-  // flutter native splach hiển thị màn hình khởi động lần đầu tiên
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-  // kiểm tra có phải điện thoại di động
   if (ResponsiveHelper.isMobilePhone()) {
     HttpOverrides.global = MyHttpOverrides();
   }

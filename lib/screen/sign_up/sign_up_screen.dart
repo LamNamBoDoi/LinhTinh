@@ -35,42 +35,53 @@ class SignUpScreen extends StatelessWidget {
       TextEditingController();
 
   final TextEditingController _paswordTextController = TextEditingController();
+  final TextEditingController _universityTextController =
+      TextEditingController();
+  final TextEditingController _yearTextController = TextEditingController();
 
   final TextEditingController _confirmPasswordTextController =
       TextEditingController();
 
   final _valueGender = Rx<String?>(null);
-
+  final _validateGender = true.obs;
+  final _formKey = GlobalKey<FormState>();
   final _showPass = false.obs;
   final _showConfirmPass = false.obs;
   DateTime? _timeBirthday = null;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        //appBar: AppBar(),
+        appBar: AppBar(
+          backgroundColor: Theme.of(context).secondaryHeaderColor,
+          title: Text("sign_up".tr),
+          centerTitle: true,
+        ),
         body: SafeArea(
-      child: Stack(
-        children: [
-          SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                HeaderWidget(context),
-                BodyWidget(context),
-              ],
-            ),
+          child: Stack(
+            children: [
+              SingleChildScrollView(
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      HeaderWidget(context),
+                      BodyWidget(context),
+                    ],
+                  ),
+                ),
+              ),
+              Center(
+                child: GetBuilder<AuthController>(
+                  builder: (controller) => Visibility(
+                      visible: controller.loading,
+                      child: const CircularProgressIndicator()),
+                ),
+              )
+            ],
           ),
-          Center(
-            child: GetBuilder<AuthController>(
-              builder: (controller) => Visibility(
-                  visible: controller.loading,
-                  child: const CircularProgressIndicator()),
-            ),
-          )
-        ],
-      ),
-    ));
+        ));
   }
 
   Widget HeaderWidget(BuildContext context) {
@@ -114,24 +125,27 @@ class SignUpScreen extends StatelessWidget {
               children: [
                 CustomTextField(
                   controller: _lastNameTextController,
-                  padding: EdgeInsets.all(10),
                   lable: 'last_name'.tr,
                   width: widthScreen / 2 - 20 - 10,
+                  validator: (value) =>
+                      value!.isEmpty ? 'please_enter_last_name'.tr : null,
                 ),
                 CustomTextField(
                   controller: _firstNameTextController,
-                  padding: EdgeInsets.all(10),
                   lable: 'first_name'.tr,
                   width: widthScreen / 2 - 20 - 10,
+                  validator: (value) =>
+                      value!.isEmpty ? 'please_enter_first_name'.tr : null,
                 ),
               ],
             ),
             CustomTextField(
               controller: _dateBirthDayTextController,
-              padding: EdgeInsets.all(10),
               width: widthScreen,
               lable: "birth_day".tr,
               enabled: true,
+              validator: (value) =>
+                  value!.isEmpty ? 'please_enter_birth_day'.tr : null,
               lastIcon: Icon(Icons.calendar_month),
               onPressedLastIcon: () async {
                 final DateTime? dateTime = await showRoundedDatePicker(
@@ -155,29 +169,48 @@ class SignUpScreen extends StatelessWidget {
             ),
             CustomTextField(
               controller: _birthPlaceTextController,
-              padding: EdgeInsets.all(10),
               width: widthScreen,
+              validator: (value) =>
+                  value!.isEmpty ? 'please_enter_birth_place'.tr : null,
               lable: "birth_place".tr,
             ),
-            SelectGenderWidget(valueGender: _valueGender),
+            SelectGenderWidget(
+              valueGender: _valueGender,
+              validateGender: _validateGender,
+            ),
             CustomTextField(
               controller: _emailTextController,
-              padding: EdgeInsets.all(10),
               width: widthScreen,
+              validator: (value) =>
+                  value!.isEmpty ? 'please_enter_email'.tr : null,
               lable: "email".tr,
             ),
             CustomTextField(
               controller: _ussernameTextController,
-              padding: EdgeInsets.all(10),
               width: widthScreen,
+              validator: (value) =>
+                  value!.isEmpty ? 'please_enter_username'.tr : null,
               lable: "username".tr,
+            ),
+            CustomTextField(
+              controller: _universityTextController,
+              lable: "university".tr,
+              validator: (value) =>
+                  value!.isEmpty ? 'please_enter_university'.tr : null,
+            ),
+            CustomTextField(
+              controller: _yearTextController,
+              lable: "school_year".tr,
+              validator: (value) =>
+                  value!.isEmpty ? 'please_enter_year'.tr : null,
             ),
             Obx(
               () => CustomTextField(
                   controller: _paswordTextController,
                   lable: "password".tr,
-                  padding: EdgeInsets.all(10),
                   isShowPass: _showPass.value,
+                  validator: (value) =>
+                      value!.isEmpty ? 'please_enter_password'.tr : null,
                   lastIcon: Icon(_showPass.value
                       ? Icons.visibility
                       : Icons.visibility_off),
@@ -187,7 +220,9 @@ class SignUpScreen extends StatelessWidget {
               () => CustomTextField(
                   controller: _confirmPasswordTextController,
                   lable: "confirm_password".tr,
-                  padding: EdgeInsets.all(10),
+                  validator: (value) => value!.isEmpty
+                      ? 'please_enter_confirm_password'.tr
+                      : null,
                   isShowPass: _showConfirmPass.value,
                   lastIcon: Icon(_showConfirmPass.value
                       ? Icons.visibility
@@ -198,7 +233,6 @@ class SignUpScreen extends StatelessWidget {
             CustomButton(
               width: double.infinity,
               buttonText: "sign_up".tr,
-              margin: const EdgeInsets.all(10),
               onPressed: _signup,
             ),
             Padding(
@@ -235,27 +269,25 @@ class SignUpScreen extends StatelessWidget {
   }
 
   _signup() async {
-    String lastName = _lastNameTextController.text;
-    String firstName = _firstNameTextController.text;
-    String? dateBirthDay =
-        _timeBirthday != null ? _timeBirthday!.toIso8601String() + "Z" : null;
-    String? birthPlace = _birthPlaceTextController.text;
-    String? gender = _valueGender.value;
-    String email = _emailTextController.text;
-    String ussername = _ussernameTextController.text;
-    String password = _paswordTextController.text;
-    String confirmPassword = _confirmPasswordTextController.text;
-    String? deviceToken = await FirebaseMessaging.instance.getToken();
-    if (lastName.isEmpty ||
-        birthPlace.isEmpty ||
-        firstName.isEmpty ||
-        gender!.isEmpty ||
-        email.isEmpty ||
-        ussername.isEmpty ||
-        password.isEmpty ||
-        confirmPassword.isEmpty) {
+    if (!_formKey.currentState!.validate() ||
+        _valueGender.value?.isEmpty == true) {
       showCustomSnackBar('cannot_left_blank'.tr);
+      _validateGender.value = false;
+      return;
     } else {
+      String lastName = _lastNameTextController.text;
+      String firstName = _firstNameTextController.text;
+      String? dateBirthDay =
+          _timeBirthday != null ? _timeBirthday!.toIso8601String() + "Z" : null;
+      String? birthPlace = _birthPlaceTextController.text;
+      String? gender = _valueGender.value;
+      String email = _emailTextController.text;
+      String ussername = _ussernameTextController.text;
+      String password = _paswordTextController.text;
+      String confirmPassword = _confirmPasswordTextController.text;
+      String university = _universityTextController.text;
+      int year = int.parse(_yearTextController.text);
+      String? deviceToken = await FirebaseMessaging.instance.getToken();
       Get.find<AuthController>()
           .signup(User(
         id: null,
@@ -277,20 +309,15 @@ class SignUpScreen extends StatelessWidget {
         gender: gender,
         hasPhoto: false,
         tokenDevice: deviceToken,
-        university: null,
-        year: 0,
+        university: university,
+        year: year,
       ))
           .then((value) {
         if (value == 200 || value == 201) {
-          showCustomSnackBar('register_success'.tr);
           Get.offAll(SignInScreen(),
               transition: Transition.cupertinoDialog,
               duration: Duration(milliseconds: 500),
               curve: Curves.easeIn);
-        } else if (value == 400) {
-          showCustomSnackBar('infomation_incorect'.tr);
-        } else {
-          showCustomSnackBar('please_try_again'.tr);
         }
       });
     }

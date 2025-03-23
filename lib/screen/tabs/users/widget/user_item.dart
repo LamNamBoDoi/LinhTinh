@@ -21,17 +21,27 @@ class UserItem extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         onTap: userController.isAdmin
-            ? () => Get.to(() => UserDetailScreen(user: user))
+            ? () {
+                if (user.image == null || user.image == "") {
+                  userController.image = "";
+                } else {
+                  userController.image = user.image!;
+                }
+                Get.to(() => UserDetailScreen());
+                userController.selectedUser = user;
+              }
             : null,
         leading: CircleAvatar(
           radius: 25,
-          backgroundImage: user.image != null
+          backgroundImage: (user.image != "" && user.image != null)
               ? NetworkImage(user.getLinkImageUrl(user.image!))
-              : null,
-          child: user.image == null ? const Icon(Icons.person, size: 30) : null,
+              : AssetImage("assets/image/avatarDefault.jpg") as ImageProvider,
         ),
         title: Text(user.displayName ?? "No Name",
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+            style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.black)),
         subtitle: Text(user.email ?? "No Email",
             style: TextStyle(color: Colors.grey[600])),
         trailing: Icon(

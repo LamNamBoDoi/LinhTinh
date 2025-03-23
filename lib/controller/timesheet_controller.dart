@@ -5,6 +5,7 @@ import 'package:timesheet/data/model/body/time_sheet.dart';
 import 'package:timesheet/data/repository/timesheet_repo.dart';
 import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:timesheet/view/custom_snackbar.dart';
 import '../data/api/api_checker.dart';
 
 class TimeSheetController extends GetxController implements GetxService {
@@ -24,79 +25,56 @@ class TimeSheetController extends GetxController implements GetxService {
   DateTime focusedDay = DateTime.now();
   Map<DateTime, List<TimeSheet>> _events = {};
   Map<DateTime, List<TimeSheet>> get events => _events;
+
+  init() async {
+    selectedDay = DateTime.now();
+    focusedDay = DateTime.now();
+    _events.clear();
+    await getTimeSheet();
+    getEventsCalendar();
+    checkTodayAttendenced();
+    update();
+  }
+
   void updateSelectedDay(DateTime selectedDay, DateTime focusedDay) {
     this.selectedDay = selectedDay;
-    this.focusedDay = focusedDay; // Cập nhật lại ngày khi người dùng chọn
-    update(); // Cập nhật UI
+    this.focusedDay = focusedDay;
+    update();
   }
 
   void updateFocusedDay(DateTime focusedDay) {
     this.focusedDay = focusedDay;
-    update(); // Cập nhật UI khi người dùng lướt qua tháng/năm
+    update();
   }
 
   void handleProgressInMonth(DateTime dateTime) {
-    double myTotalDayInMonth =
+    totalDayInMonth =
         DateTime(dateTime.year, dateTime.month + 1, 0).day.toDouble();
-    double myTotalDayCheckInMonth = 0;
-
-    for (var time in timeSheets) {
+    totalDayCheckinInMonth = 0;
+    progressRate = 0;
+    for (var time in _timeSheets) {
       DateTime? dateCheckin =
           DateTime.fromMillisecondsSinceEpoch(time.dateAttendance!);
       if (dateTime.year == dateCheckin.year &&
           dateTime.month == dateCheckin.month) {
-        myTotalDayCheckInMonth += 1;
+        totalDayCheckinInMonth += 1;
       }
-      progressRate = ((100 / myTotalDayInMonth) * myTotalDayCheckInMonth) / 100;
-      totalDayInMonth = myTotalDayInMonth;
-      totalDayCheckinInMonth = myTotalDayCheckInMonth;
+      progressRate = ((100 / totalDayInMonth) * totalDayCheckinInMonth) / 100;
+      totalDayInMonth = totalDayInMonth;
+      totalDayCheckinInMonth = totalDayCheckinInMonth;
     }
     update();
   }
 
   void getEventsCalendar() {
-    for (var element in _timeSheets) {
+    for (var event in _timeSheets) {
       DateTime? dateTime =
-          DateTime.fromMillisecondsSinceEpoch(element.dateAttendance!);
-
+          DateTime.fromMillisecondsSinceEpoch(event.dateAttendance!);
       DateTime key =
           DateTime(dateTime.year, dateTime.month, dateTime.day).toLocal();
-      _events[key] = [element];
+      _events[key] = [event];
     }
     update();
-  }
-
-  init() async {
-    selectedDay = DateTime.now();
-    focusedDay = DateTime.now();
-    update();
-    await getTimeSheet();
-    getEventsCalendar();
-  }
-
-  Future<String?> getWifiIP() async {
-    try {
-      // Kiểm tra kết nối mạng
-      final connectivityResult = await (Connectivity().checkConnectivity());
-      if (connectivityResult == ConnectivityResult.wifi) {
-        // Lấy danh sách các Network Interface
-        var interfaces = await NetworkInterface.list();
-        for (var interface in interfaces) {
-          // Lặp qua các địa chỉ IP của interface
-          for (var address in interface.addresses) {
-            if (address.address != '127.0.0.1' &&
-                address.address.contains('.')) {
-              return address.address; // Trả về địa chỉ IP
-            }
-          }
-        }
-      } else {
-        print("Không kết nối Wi-Fi.");
-      }
-    } catch (e) {
-      print("Lỗi khi lấy địa chỉ IP: $e");
-    }
-    return null;
   }
 
   Future<int> checkIn() async {
@@ -110,7 +88,12 @@ class TimeSheetController extends GetxController implements GetxService {
       TimeSheet? timeSheet = TimeSheet.fromJson(response.body);
       attendanced = true;
       timeSheets.add(timeSheet);
+      getEventsCalendar();
+      handleProgressInMonth(DateTime.now());
+      showCustomFlash("Điểm danh thành công", Get.context!, isError: false);
     } else {
+      showCustomFlash("Điểm danh thất bại", Get.context!, isError: true);
+
       ApiChecker.checkApi(response);
     }
     _isLoading = false;
@@ -128,7 +111,6 @@ class TimeSheetController extends GetxController implements GetxService {
       List<TimeSheet> convertListTimeSheets = (response.body as List<dynamic>)
           .map((json) => TimeSheet.fromJson(json))
           .toList();
-
       _timeSheets = convertListTimeSheets;
       handleProgressInMonth(DateTime.now());
     } else {
@@ -139,18 +121,43 @@ class TimeSheetController extends GetxController implements GetxService {
     return response.statusCode!;
   }
 
-  void checkTodayAttendenced(TimeSheetController timeSheetController) {
+  void checkTodayAttendenced() {
     DateTime dayCompare =
         DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
             .toLocal();
-    if (isSameDay(timeSheetController.selectedDay, DateTime.now())) {
-      if (timeSheetController.events[dayCompare] != null) {
-        timeSheetController.attendanced = true;
+    if (isSameDay(selectedDay, DateTime.now())) {
+      if (events[dayCompare] != null) {
+        attendanced = true;
       } else {
-        timeSheetController.attendanced = false;
+        attendanced = false;
       }
     } else {
-      timeSheetController.attendanced = true;
+      attendanced = true;
     }
+    update();
   }
+}
+
+Future<String?> getWifiIP() async {
+  try {
+    // Kiểm tra kết nối mạng
+    final connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult == ConnectivityResult.wifi) {
+      // Lấy danh sách các Network Interface
+      var interfaces = await NetworkInterface.list();
+      for (var interface in interfaces) {
+        // Lặp qua các địa chỉ IP của interface
+        for (var address in interface.addresses) {
+          if (address.address != '127.0.0.1' && address.address.contains('.')) {
+            return address.address; // Trả về địa chỉ IP
+          }
+        }
+      }
+    } else {
+      print("Không kết nối Wi-Fi.");
+    }
+  } catch (e) {
+    print("Lỗi khi lấy địa chỉ IP: $e");
+  }
+  return null;
 }

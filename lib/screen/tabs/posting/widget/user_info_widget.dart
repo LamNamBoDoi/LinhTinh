@@ -38,7 +38,12 @@ Widget _buildInfoRow(IconData icon, String text, BuildContext context) {
       children: [
         Icon(icon, color: Theme.of(context).primaryColor),
         const SizedBox(width: 12),
-        Expanded(child: Text(text, style: const TextStyle(fontSize: 16))),
+        Expanded(
+            child: Text(text,
+                style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.black,
+                    fontWeight: FontWeight.w500))),
       ],
     ),
   );

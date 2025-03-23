@@ -20,7 +20,7 @@ class TrackingScreen extends StatefulWidget {
 class _TrackingScreenState extends State<TrackingScreen> {
   final _contentController = TextEditingController();
   DateTime timeSelect = DateTime.now();
-
+  final _formKey = GlobalKey<FormState>();
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
@@ -51,39 +51,46 @@ class _TrackingScreenState extends State<TrackingScreen> {
                   child: CircularProgressIndicator(),
                 );
               }
-              return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        widget.update == true
-                            ? SelectDeleteWidget(
-                                trackingController: trackController,
-                                tracking: widget.tracking)
-                            : const SizedBox(),
-                      ],
-                    ),
-                    SelectDayWidget(
-                      width: width,
-                      timeSelect: timeSelect,
-                      onTimeChanged: (newTime) {
-                        setState(() {
-                          timeSelect =
-                              newTime; // Cập nhật state khi chọn ngày/giờ
-                        });
-                      },
-                    ),
-                    const SizedBox(
-                      height: 30,
-                    ),
-                    FillTrackingWidget(
-                      contentController: _contentController,
-                      timeSelect: timeSelect,
-                      tracking: widget.tracking,
-                      trackingController: trackController,
-                      update: widget.update ?? false,
-                    )
-                  ]);
+              return Form(
+                key: _formKey,
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SelectDayWidget(
+                        width: width,
+                        timeSelect: timeSelect,
+                        onTimeChanged: (newTime) {
+                          setState(() {
+                            timeSelect = newTime;
+                          });
+                        },
+                      ),
+                      const SizedBox(
+                        height: 30,
+                      ),
+                      FillTrackingWidget(
+                        formKey: _formKey,
+                        contentController: _contentController,
+                        timeSelect: timeSelect,
+                        tracking: widget.tracking,
+                        trackingController: trackController,
+                        update: widget.update ?? false,
+                      ),
+                      SizedBox(
+                        height: 20,
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          widget.update == true
+                              ? SelectDeleteWidget(
+                                  trackingController: trackController,
+                                  tracking: widget.tracking)
+                              : const SizedBox(),
+                        ],
+                      ),
+                    ]),
+              );
             },
           ),
         ));

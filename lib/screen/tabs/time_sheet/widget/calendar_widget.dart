@@ -21,7 +21,7 @@ class CalendarWidget extends StatelessWidget {
       onDaySelected: (selectedDay, focusedDay) {
         timeSheetController.updateSelectedDay(selectedDay, focusedDay);
         trackingController.getTrackingDate(selectedDay);
-        timeSheetController.checkTodayAttendenced(timeSheetController);
+        timeSheetController.checkTodayAttendenced();
       },
       eventLoader: (day) {
         DateTime dayCompare = DateTime(day.year, day.month, day.day).toLocal();
@@ -43,21 +43,26 @@ class CalendarWidget extends StatelessWidget {
         weekdayStyle: TextStyle(
             color: Theme.of(context).secondaryHeaderColor,
             fontSize: 15,
-            fontWeight: FontWeight.w400),
-        weekendStyle: TextStyle(
-            color: Colors.red, fontSize: 15, fontWeight: FontWeight.w400),
+            fontWeight: FontWeight.w500),
+        weekendStyle: const TextStyle(
+            color: Colors.red, fontSize: 15, fontWeight: FontWeight.w500),
       ),
       availableGestures: AvailableGestures.all,
       calendarStyle: CalendarStyle(
-        markerDecoration: BoxDecoration(
-          color: Theme.of(context).secondaryHeaderColor,
+        markerDecoration: const BoxDecoration(
+          color: Colors.blue,
           shape: BoxShape.circle,
         ),
         defaultTextStyle: Theme.of(context).textTheme.bodyLarge!,
-        weekendTextStyle: const TextStyle(color: Colors.red),
-        todayTextStyle: const TextStyle(color: Colors.green),
+        weekendTextStyle:
+            const TextStyle(color: Colors.red, fontWeight: FontWeight.w400),
+        todayTextStyle:
+            const TextStyle(color: Colors.green, fontWeight: FontWeight.w400),
+        selectedTextStyle: TextStyle(
+            color: Theme.of(context).cardColor, fontWeight: FontWeight.w600),
         selectedDecoration: BoxDecoration(
-            color: Theme.of(context).hintColor, shape: BoxShape.circle),
+            color: Theme.of(context).secondaryHeaderColor,
+            shape: BoxShape.circle),
         todayDecoration: BoxDecoration(
           color: Colors.transparent,
           shape: BoxShape.circle,

@@ -11,16 +11,21 @@ import 'package:timesheet/theme/theme_controller.dart';
 import 'package:timesheet/utils/app_constants.dart';
 import 'package:timesheet/view/custom_snackbar.dart';
 
-class SettingScreen extends StatelessWidget {
+class SettingScreen extends StatefulWidget {
   const SettingScreen({super.key});
 
+  @override
+  State<SettingScreen> createState() => _SettingScreenState();
+}
+
+class _SettingScreenState extends State<SettingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
           centerTitle: true,
-          title: const Text(
-            "Setting",
+          title: Text(
+            "settings".tr,
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
           ),
           backgroundColor: Theme.of(context).secondaryHeaderColor,
@@ -55,13 +60,21 @@ class SettingScreen extends StatelessWidget {
                                     switch (index) {
                                       case 0:
                                         return SwitchListTile(
-                                          secondary: const Icon(Icons.dark_mode,
-                                              color: Colors.blue),
-                                          title: Text("dark_color_mode".tr),
-                                          value: themeController.darkTheme!,
-                                          onChanged: (_) =>
-                                              themeController.toggleTheme(),
-                                        );
+                                            secondary: const Icon(
+                                                Icons.dark_mode,
+                                                color: Colors.blue),
+                                            title: Text("dark_color_mode".tr),
+                                            value: themeController.darkTheme!,
+                                            onChanged: (_) {
+                                              themeController.toggleTheme();
+                                              themeController.darkTheme == true
+                                                  ? showCustomFlash(
+                                                      "dark_mode".tr, context,
+                                                      isError: false)
+                                                  : showCustomFlash(
+                                                      "bright_mode".tr, context,
+                                                      isError: false);
+                                            });
                                       case 1:
                                         return SettingItem(
                                           icon: Icons.notifications,
@@ -71,14 +84,19 @@ class SettingScreen extends StatelessWidget {
                                         );
                                       case 2:
                                         return SettingItem(
-                                          icon: Icons.person,
-                                          title: "personal_information".tr,
-                                          onTap: () => Get.to(() =>
-                                              EditProfileScreen(
-                                                  user:
-                                                      Get.find<UserController>()
-                                                          .currentUser)),
-                                        );
+                                            icon: Icons.person,
+                                            title: "personal_information".tr,
+                                            onTap: () {
+                                              userController.image =
+                                                  userController
+                                                      .currentUser.image!;
+                                              userController.userUpdate =
+                                                  userController.currentUser;
+                                              Get.to(() => EditProfileScreen(
+                                                  isMyProfile: true,
+                                                  user: userController
+                                                      .userUpdate));
+                                            });
                                       case 3:
                                         String languageName = AppConstants
                                             .languages
@@ -140,7 +158,8 @@ class SettingScreen extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 50,
-              backgroundImage: controller.currentUser.image != null
+              backgroundImage: (controller.currentUser.image != "" &&
+                      controller.currentUser.image != null)
                   ? NetworkImage(controller.currentUser
                       .getLinkImageUrl(controller.currentUser.image!))
                   : const AssetImage("assets/image/avatarDefault.jpg")
@@ -160,21 +179,65 @@ class SettingScreen extends StatelessWidget {
   void _showLanguageBottomSheet(LocalizationController controller) {
     Get.bottomSheet(
       Container(
-        color: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 10),
+        decoration: BoxDecoration(
+          color: Theme.of(context).secondaryHeaderColor,
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: AppConstants.languages.map((lang) {
-            return ListTile(
-              title: Text(lang.languageName,
-                  style: const TextStyle(color: Colors.black)),
-              onTap: () {
-                controller
-                    .setLanguage(Locale(lang.languageCode, lang.countryCode));
-                Get.back();
-              },
+            final isCurrentLanguage =
+                controller.locale.languageCode == lang.languageCode;
+
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              margin: const EdgeInsets.symmetric(vertical: 5),
+              decoration: BoxDecoration(
+                color: isCurrentLanguage ? Colors.black : Colors.white,
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 5,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: ListTile(
+                leading: isCurrentLanguage
+                    ? Icon(Icons.check_circle,
+                        color: Theme.of(context).primaryColor)
+                    : const SizedBox(),
+                title: Text(
+                  lang.languageName,
+                  style: TextStyle(
+                    color: isCurrentLanguage ? Colors.white : Colors.black,
+                    fontWeight:
+                        isCurrentLanguage ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+                onTap: () {
+                  if (!isCurrentLanguage) {
+                    controller.setLanguage(
+                        Locale(lang.languageCode, lang.countryCode));
+                    showCustomFlash("changed_language".tr, context,
+                        isError: false);
+                  }
+                  Get.back();
+                },
+              ),
             );
           }).toList(),
+        ),
+      ),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
         ),
       ),
     );
@@ -183,11 +246,12 @@ class SettingScreen extends StatelessWidget {
   void _handleLogout(AuthController authController) {
     authController.logOut().then((response) {
       if (response == 200) {
-        showCustomFlash("Đăng xuất thành công", Get.context!, isError: false);
+        showCustomFlash("Đăng xuất thành công".tr, Get.context!,
+            isError: false);
         Get.find<UserController>().resetDataProfile();
         Get.offAll(() => SignInScreen());
       } else {
-        showCustomFlash("Đăng xuất thất bại", Get.context!, isError: true);
+        showCustomFlash("Đăng xuất thất bại".tr, Get.context!, isError: true);
       }
     });
   }

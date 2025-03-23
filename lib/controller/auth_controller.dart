@@ -1,10 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:timesheet/data/api/api_checker.dart';
 import 'package:timesheet/data/model/body/users/user.dart';
 import 'package:timesheet/data/model/response/token_resposive.dart';
 import 'package:timesheet/data/repository/auth_repo.dart';
+import 'package:timesheet/view/custom_snackbar.dart';
 
 class AuthController extends GetxController implements GetxService {
   final AuthRepo repo;
@@ -64,7 +64,12 @@ class AuthController extends GetxController implements GetxService {
     Response response = await repo.signup(user);
     debugPrint("okeoke: ${response.statusCode}");
     if (response.statusCode == 200 || response.statusCode == 201) {
+      showCustomFlash("register_success".tr, Get.context!, isError: false);
+    } else if (response.statusCode == 400) {
+      showCustomFlash("infomation_incorect".tr, Get.context!, isError: false);
+      ApiChecker.checkApi(response);
     } else {
+      showCustomFlash("please_try_again".tr, Get.context!, isError: false);
       ApiChecker.checkApi(response);
     }
     _loading = false;

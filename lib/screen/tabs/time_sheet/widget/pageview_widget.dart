@@ -7,7 +7,6 @@ import 'package:timesheet/data/model/body/traking.dart';
 import 'package:timesheet/helper/date_converter.dart';
 import 'package:timesheet/screen/tabs/tracking/tracking_screen.dart';
 import 'package:timesheet/utils/dimensions.dart';
-import 'package:timesheet/view/custom_button.dart';
 
 class PageviewWidget extends StatelessWidget {
   PageviewWidget(
@@ -188,22 +187,38 @@ class PageviewWidget extends StatelessWidget {
       builder: (BuildContext context) {
         return Dialog(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16), // Bo tròn góc hơn
           ),
+          elevation: 10, // Thêm shadow cho Dialog
           insetPadding: EdgeInsets.all(20),
           child: Container(
             width: MediaQuery.of(context).size.width * 0.6,
             height: MediaQuery.of(context).size.height * 0.4,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16), // Bo tròn góc hơn
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  height: 50,
+                  height: 60,
                   decoration: const BoxDecoration(
-                    color: Color(0xFF01877E),
+                    gradient: LinearGradient(
+                      colors: [Color(0xFF01877E), Color(0xFF00A99D)],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
                     borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(12),
-                      topRight: Radius.circular(12),
+                      topLeft: Radius.circular(16),
+                      topRight: Radius.circular(16),
                     ),
                   ),
                   child: const Center(
@@ -211,7 +226,7 @@ class PageviewWidget extends StatelessWidget {
                       "Tracking",
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 20,
+                        fontSize: 22,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -224,22 +239,20 @@ class PageviewWidget extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Time: " +
-                              DateConverter.dateTimeHourFormat.format(
-                                DateTime.fromMillisecondsSinceEpoch(
-                                    tracking.date!),
-                              ),
+                          "Time: ${DateConverter.dateTimeHourFormat.format(
+                            DateTime.fromMillisecondsSinceEpoch(tracking.date!),
+                          )}",
                           style: const TextStyle(
                             fontSize: 18,
                             color: Color(0xFF01877E),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 16),
                         Expanded(
                           child: SingleChildScrollView(
                             child: Text(
-                              "Tracking: " + tracking.content!,
+                              "Tracking: ${tracking.content!}",
                               style: const TextStyle(
                                 fontSize: 18,
                                 color: Color(0xFF01877E),
@@ -253,23 +266,43 @@ class PageviewWidget extends StatelessWidget {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.only(bottom: 16, right: 16),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      CustomButton(
-                        height: 50,
-                        width: 50,
-                        onPressed: () {
+                      InkWell(
+                        onTap: () {
                           Get.to(() => TrackingScreen(
                                 update: true,
                                 tracking: tracking,
                               ));
                         },
-                        off: false,
-                        icon: Icons.edit,
+                        borderRadius: BorderRadius.circular(12),
+                        child: Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 6,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                            border: Border.all(
+                              color: Color(0xFF01877E),
+                              width: 2,
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.edit,
+                            color: Color(0xFF01877E),
+                            size: 24,
+                          ),
+                        ),
                       ),
-                      const SizedBox(width: 10),
                     ],
                   ),
                 ),

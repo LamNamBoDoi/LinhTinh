@@ -108,4 +108,26 @@ class User {
     String newUrl = typeImage.replaceAll(" ", "%20").replaceAll(":", "%3A");
     return "${AppConstants.BASE_URL}${AppConstants.GET_IMAGE_BY_NAME}$newUrl";
   }
+
+  bool isEqual(User other) {
+    return id == other.id &&
+        username == other.username &&
+        active == other.active &&
+        // birthPlace == other.birthPlace &&
+        displayName == other.displayName &&
+        // dob == other.dob &&
+        email == other.email &&
+        // firstName == other.firstName &&
+        // lastName == other.lastName &&
+        password == other.password &&
+        image == other.image &&
+        // changePass == other.changePass &&
+        // setPassword == other.setPassword &&
+        // roles == other.roles &&
+        gender == other.gender &&
+        // hasPhoto == other.hasPhoto &&
+        // tokenDevice == other.tokenDevice &&
+        university == other.university &&
+        year == other.year;
+  }
 }

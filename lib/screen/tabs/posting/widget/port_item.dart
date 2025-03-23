@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:timesheet/controller/post_controller.dart';
+import 'package:timesheet/controller/user_controller.dart';
 import 'package:timesheet/data/model/body/post/post.dart';
 import 'package:timesheet/screen/tabs/posting/comment_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:timesheet/screen/tabs/posting/personal_page_screen.dart';
+import 'package:timesheet/view/custom_snackbar.dart';
 
 class PostItem extends StatelessWidget {
   final Post post;
   final PostController postController;
+  final bool isPersonPage;
 
-  const PostItem({Key? key, required this.post, required this.postController})
+  const PostItem(
+      {Key? key,
+      required this.post,
+      required this.postController,
+      required this.isPersonPage})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -28,19 +35,22 @@ class PostItem extends StatelessWidget {
               children: [
                 GestureDetector(
                   onTap: () => Get.to(() => PersonalPageScreen(
+                      isMyPost: post.user.id ==
+                              Get.find<UserController>().currentUser.id
+                          ? true
+                          : false,
                       userId: post.user.id!,
                       displayName: post.user.displayName!)),
                   child: Row(
                     children: [
                       CircleAvatar(
                         radius: 25,
-                        backgroundImage: post.user.image != null
-                            ? NetworkImage(post.user.getLinkImageUrl(
-                                post.user.image!)) // Hiển thị ảnh từ URL
-                            : null,
-                        child: post.user.image == null
-                            ? Icon(Icons.person, size: 30)
-                            : null,
+                        backgroundImage:
+                            (post.user.image != "" && post.user.image != null)
+                                ? NetworkImage(
+                                    post.user.getLinkImageUrl(post.user.image!))
+                                : AssetImage("assets/image/avatarDefault.jpg")
+                                    as ImageProvider,
                       ),
                       SizedBox(width: 10),
                       Column(
@@ -123,9 +133,11 @@ class PostItem extends StatelessWidget {
                 TextButton.icon(
                   onPressed: () {
                     if (!postController.checkLike(post)) {
-                      postController.likePost(post);
+                      postController.likePost(post, isPersonPage: isPersonPage);
+                    } else {
+                      // postController.dislikePost(post);
+                      showCustomSnackBar("Chưa xóa like được", isError: true);
                     }
-                    postController.dislikePost(post);
                   },
                   icon: postController.checkLike(post)
                       ? const Icon(
@@ -150,13 +162,13 @@ class PostItem extends StatelessWidget {
                       PageRouteBuilder(
                         pageBuilder: (context, animation, secondaryAnimation) =>
                             CommentScreen(
+                          isPersonPage: isPersonPage,
                           post: post,
                         ),
                         transitionsBuilder:
                             (context, animation, secondaryAnimation, child) {
-                          const begin = Offset(0.0, 1.0); // Bắt đầu từ dưới
-                          const end =
-                              Offset.zero; // Kết thúc tại vị trí bình thường
+                          const begin = Offset(0.0, 1.0);
+                          const end = Offset.zero;
                           const curve = Curves.easeInOut;
                           var tween = Tween(begin: begin, end: end)
                               .chain(CurveTween(curve: curve));
