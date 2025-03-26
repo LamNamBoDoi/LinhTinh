@@ -43,7 +43,6 @@ class UserDetailScreen extends StatelessWidget {
                 userController.userUpdate = userController.selectedUser;
                 Get.to(() => EditProfileScreen(
                       isMyProfile: false,
-                      user: userController.userUpdate,
                     ));
               },
             ),

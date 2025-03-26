@@ -14,16 +14,14 @@ import 'package:timesheet/view/custom_snackbar.dart';
 import 'package:timesheet/view/custom_text_field.dart';
 
 class EditProfileScreen extends StatefulWidget {
-  const EditProfileScreen(
-      {super.key, required this.isMyProfile, required this.user});
+  const EditProfileScreen({super.key, required this.isMyProfile});
   final bool isMyProfile;
-  final User user;
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
-  late User user;
+  User user = Get.find<UserController>().currentUser;
   final TextEditingController _displayNameTextController =
       TextEditingController();
   final TextEditingController _dateBirthDayTextController =
@@ -43,7 +41,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   void initState() {
     super.initState();
-    user = widget.user;
+    user = Get.find<UserController>().userUpdate;
     PhotoController photoController = Get.find<PhotoController>();
 
     photoController.selectedPhoto = null;
@@ -78,24 +76,30 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     children: [
                       ChangeAvatarWidget(isMyProfile: widget.isMyProfile),
                       const SizedBox(height: 20),
-                      Obx(
-                        () => SwitchListTile(
-                            title: Text("account_status".tr,
-                                style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Theme.of(context)
-                                        .textTheme
-                                        .bodyLarge!
-                                        .color)),
-                            value: _activeUser.value,
-                            onChanged: (value) => _blockUser(value, user)),
-                      ),
+                      Obx(() => SwitchListTile(
+                          title: Text("account_status".tr,
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge!
+                                      .color)),
+                          value: _activeUser.value,
+                          onChanged: (value) {
+                            FocusManager.instance.primaryFocus?.unfocus();
+                            if (mounted) {
+                              setState(() {
+                                user = controller.userUpdate;
+                              });
+                            }
+                            _blockUser(value, user);
+                          })),
                       CustomTextField(
                         controller: _displayNameTextController,
-                        lable: 'last_name'.tr,
+                        lable: 'name'.tr,
                         validator: (value) =>
-                            value!.isEmpty ? 'please_enter_last_name'.tr : null,
+                            value!.isEmpty ? 'please_enter_name'.tr : null,
                       ),
                       CustomTextField(
                         controller: _dateBirthDayTextController,
@@ -266,14 +270,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   void _blockUser(bool value, User user) {
-    FocusScope.of(context).unfocus();
     if (_activeUser.value == true) {
       if (widget.isMyProfile) {
         if (Get.find<UserController>().isAdmin == false) {
           showCustomConfirm(context, "change_account_status".tr, () {
             _activeUser.value = value;
-            Get.find<UserController>().blockUser(user.id!).then(
-                (_) async => await Get.find<UserController>().getListUsers());
+            Get.find<UserController>().blockUser(user.id!, true);
             Navigator.pop(context);
           });
         }
@@ -282,8 +284,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             Get.find<UserController>().selectedUser.username != "admin") {
           showCustomConfirm(context, "change_account_status".tr, () {
             _activeUser.value = value;
-            Get.find<UserController>().blockUser(user.id!).then(
-                (_) async => await Get.find<UserController>().getListUsers());
+            Get.find<UserController>().blockUser(user.id!, false);
             Navigator.pop(context);
           });
         }

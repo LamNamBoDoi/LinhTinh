@@ -26,6 +26,7 @@ class _UsersScreenState extends State<UsersScreen> {
   }
 
   void _onScroll() {
+    FocusManager.instance.primaryFocus?.unfocus();
     if (_scrollController.position.pixels ==
             _scrollController.position.maxScrollExtent &&
         !isLoadingMore) {

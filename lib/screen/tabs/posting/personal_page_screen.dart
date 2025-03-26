@@ -115,9 +115,9 @@ class _PersonalPageScreenState extends State<PersonalPageScreen> {
                 width: mqWidth,
                 height: hightHead,
                 child: SingleChildScrollView(
+                  padding: EdgeInsets.symmetric(vertical: 10),
                   child: Column(
                     children: [
-                      const SizedBox(height: 20),
                       CircleAvatar(
                         radius: 50,
                         backgroundImage: (user!.image != "" &&

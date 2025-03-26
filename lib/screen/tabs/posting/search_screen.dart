@@ -14,12 +14,18 @@ class _SearchScreenState extends State<SearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   final UserController userController = Get.find<UserController>();
   bool isLoadingMore = false;
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     userController.restartListUser();
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    FocusManager.instance.primaryFocus?.unfocus();
   }
 
   @override
@@ -51,6 +57,7 @@ class _SearchScreenState extends State<SearchScreen> {
           return displayUsers.isEmpty
               ? Center(child: Text("enter_keywords_to_search".tr))
               : ListView.builder(
+                  controller: _scrollController,
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   itemCount: displayUsers.length,
                   itemBuilder: (context, index) {
