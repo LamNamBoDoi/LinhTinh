@@ -212,17 +212,18 @@ class UserController extends GetxController implements GetxService {
     return User.fromJson(response.body);
   }
 
-  Future<int?> blockUser(int id) async {
+  Future<int?> blockUser(int id, bool isMyProfile) async {
     _loading = true;
+    _usersPageCurrent.clear();
     update();
     Response response = await repo.blockUser(id.toString());
     debugPrint("blockUser: ${response.statusCode}");
     if (response.statusCode == 200) {
       _selectedUser = User.fromJson(response.body);
       _userUpdate = _selectedUser;
-      print(_userUpdate.active);
       await getListUsersPage(isUpdate: true);
       await getListUsers();
+      isMyProfile ? await getCurrentUser() : "";
       searchUsers(query);
       showCustomFlash("account_locked_successfully".tr, Get.context!,
           isError: false);

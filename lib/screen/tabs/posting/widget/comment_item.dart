@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:timesheet/data/model/body/post/comment.dart';
 import 'package:intl/intl.dart';
+import 'package:timesheet/screen/tabs/posting/personal_page_screen.dart';
 
 class CommentItem extends StatelessWidget {
   const CommentItem({super.key, required this.comment});
@@ -13,13 +14,20 @@ class CommentItem extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            radius: 24,
-            backgroundImage: (comment.user!.image != "" &&
-                    comment.user!.image != null)
-                ? NetworkImage(
-                    comment.user!.getLinkImageUrl(comment.user!.image!))
-                : AssetImage("assets/image/avatarDefault.jpg") as ImageProvider,
+          GestureDetector(
+            onTap: () => Get.to(() => PersonalPageScreen(
+                userId: comment.user!.id!,
+                displayName: comment.user!.displayName!,
+                isMyPost: false)),
+            child: CircleAvatar(
+              radius: 24,
+              backgroundImage:
+                  (comment.user!.image != "" && comment.user!.image != null)
+                      ? NetworkImage(
+                          comment.user!.getLinkImageUrl(comment.user!.image!))
+                      : AssetImage("assets/image/avatarDefault.jpg")
+                          as ImageProvider,
+            ),
           ),
           SizedBox(width: 10),
           Expanded(

@@ -93,9 +93,8 @@ class _SettingScreenState extends State<SettingScreen> {
                                               userController.userUpdate =
                                                   userController.currentUser;
                                               Get.to(() => EditProfileScreen(
-                                                  isMyProfile: true,
-                                                  user: userController
-                                                      .userUpdate));
+                                                    isMyProfile: true,
+                                                  ));
                                             });
                                       case 3:
                                         String languageName = AppConstants

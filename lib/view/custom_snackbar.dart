@@ -35,7 +35,7 @@ void showCustomFlash(String message, BuildContext context,
     context.showFlash<bool>(
       barrierColor: Colors.transparent,
       barrierBlur: 0,
-      duration: Duration(seconds: 2),
+      duration: Duration(seconds: 1),
       barrierDismissible: true,
       builder: (context, controller) => FlashBar(
         margin: EdgeInsets.all(10),
